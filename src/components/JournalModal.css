@@ -1,0 +1,230 @@
+.journal-modal {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .journal-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .sessions-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 15px;
+    border-right: 1px solid var(--border-color);
+  }
+  
+  .sessions-list h3 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .sessions-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sessions-list li {
+    padding: 15px;
+    margin-bottom: 10px;
+    background: var(--item-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s;
+  }
+  
+  .sessions-list li.active {
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  .sessions-list li:hover {
+    transform: translateX(2px);
+  }
+  
+  .session-info h4 {
+    margin: 0 0 5px 0;
+    color: var(--text-primary);
+  }
+  
+  .session-info p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+  
+  .session-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  .load-btn, .notes-btn, .delete-btn, .jpg-btn, .csv-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: opacity 0.2s;
+  }
+  
+  .load-btn {
+    background: var(--primary-color);
+    color: white;
+  }
+  
+  .notes-btn {
+    background: var(--secondary-color);
+    color: white;
+  }
+  
+  .delete-btn {
+    background: var(--error-color);
+    color: white;
+  }
+  
+  .jpg-btn {
+    background: #e53e3e;
+    color: white;
+  }
+  
+  .csv-btn {
+    background: #38a169;
+    color: white;
+  }
+  
+  .export-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .notes-section {
+    flex: 1;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .notes-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+  
+  .note {
+    background: var(--item-bg);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+  }
+  
+  .note-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+  }
+  
+  .note-text {
+    color: var(--text-primary);
+  }
+  
+  .add-note {
+    margin-top: auto;
+  }
+  
+  .add-note textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    resize: vertical;
+  }
+  
+  .add-btn {
+    padding: 8px 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .add-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .select-session-prompt {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: var(--text-secondary);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+  }
+  
+  .loading-indicator {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+  }
+  
+  /* Dark/Light theme variables */
+  [data-theme="dark"] {
+    --modal-bg: #2d3748;
+    --modal-border: #4a5568;
+    --modal-header-bg: #1a202c;
+    --item-bg: #1a202c;
+    --input-bg: #1a202c;
+    --primary-color: #4299e1;
+    --secondary-color: #9f7aea;
+    --error-color: #e53e3e;
+  }
+  
+  [data-theme="light"] {
+    --modal-bg: #ffffff;
+    --modal-border: #e2e8f0;
+    --modal-header-bg: #f7fafc;
+    --item-bg: #f7fafc;
+    --input-bg: #ffffff;
+    --primary-color: #3182ce;
+    --secondary-color: #805ad5;
+    --error-color: #e53e3e;
+  }
+  
+  @media (max-width: 768px) {
+    .journal-container {
+      flex-direction: column;
+    }
+    
+    .sessions-list {
+      border-right: none;
+      border-bottom: 1px solid var(--border-color);
+      padding-right: 0;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+      max-height: 300px;
+    }
+    
+    .notes-section {
+      padding-left: 0;
+    }
+  }

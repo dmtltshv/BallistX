@@ -1,0 +1,72 @@
+/* Theme variables */
+[data-theme="dark"] {
+    --card-bg: #2d3748;
+    --field-card-bg: #1a365d;
+    --input-bg: #1a202c;
+    --border-color: #4a5568;
+    --field-border-color: #2c5282;
+    --text-primary: #f7fafc;
+    --primary-color: #4299e1;
+    --secondary-color: #9f7aea;
+    --field-primary: #48bb78;
+    --weather-button-bg: #4a5568;
+    --table-header-bg: #1a202c;
+    --table-row-hover: rgba(255, 255, 255, 0.05);
+    --wind-arena-bg: #1a202c;
+    --wind-arrow-color: #63b3ed;
+    --wind-center-color: #e53e3e;
+    --compass-mark-color: #a0aec0;
+    --voice-button-bg: #4a5568;
+    --voice-button-active: #e53e3e;
+    --voice-status-bg: rgba(255, 255, 255, 0.1);
+    --error-bg: rgba(229, 62, 62, 0.1);
+    --error-color: #fc8181;
+  }
+  
+  [data-theme="light"] {
+    --card-bg: #ffffff;
+    --field-card-bg: #f0fff4;
+    --input-bg: #f7fafc;
+    --border-color: #e2e8f0;
+    --field-border-color: #bee3f8;
+    --text-primary: #1a202c;
+    --primary-color: #3182ce;
+    --secondary-color: #805ad5;
+    --field-primary: #38a169;
+    --weather-button-bg: #718096;
+    --table-header-bg: #edf2f7;
+    --table-row-hover: rgba(0, 0, 0, 0.05);
+    --wind-arena-bg: #edf2f7;
+    --wind-arrow-color: #3182ce;
+    --wind-center-color: #e53e3e;
+    --compass-mark-color: #4a5568;
+    --voice-button-bg: #718096;
+    --voice-button-active: #e53e3e;
+    --voice-status-bg: rgba(0, 0, 0, 0.05);
+    --error-bg: rgba(229, 62, 62, 0.1);
+    --error-color: #e53e3e;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .bullet-library-modal,
+  .journal-modal {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1001;
+  }

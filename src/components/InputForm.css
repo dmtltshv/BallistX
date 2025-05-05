@@ -1,0 +1,104 @@
+.input-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+  }
+  
+  .form-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .bullet-select-wrapper {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .library-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn-calculate {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    flex: 1;
+  }
+  
+  .btn-journal {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  /* Field mode styles */
+  .input-form.field-mode .form-card {
+    background: var(--field-card-bg);
+    border-color: var(--field-border-color);
+  }
+  
+  .input-form.field-mode .btn-calculate {
+    background: var(--field-primary);
+  }
+  

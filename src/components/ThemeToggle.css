@@ -1,0 +1,28 @@
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  
+  .theme-toggle:hover {
+    background: var(--hover-bg);
+  }
+  
+  .theme-text {
+    font-size: 0.9rem;
+  }
+  
+  [data-theme="dark"] {
+    --hover-bg: rgba(255, 255, 255, 0.1);
+  }
+  
+  [data-theme="light"] {
+    --hover-bg: rgba(0, 0, 0, 0.05);
+  }
