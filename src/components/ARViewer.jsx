@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ARButton, XR } from '@react-three/xr';
+import { XR, ARButton } from '@react-three/xr';
 import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import './ARViewer.css';
 
 const TrajectoryLine = ({ trajectory }) => {
   const points = trajectory.map(point => 
-    new THREE.Vector3(point.range/100, -point.drop/100, point.windage.cm/100)
+    new THREE.Vector3(point.range / 100, -point.drop / 100, point.windage.cm / 100)
   );
 
   return (
@@ -20,13 +20,13 @@ const TrajectoryLine = ({ trajectory }) => {
 
 const WindIndicator = ({ windData }) => {
   const dir = new THREE.Vector3(
-    Math.cos(windData.angle * Math.PI/180),
+    Math.cos(windData.angle * Math.PI / 180),
     0,
-    Math.sin(windData.angle * Math.PI/180)
+    Math.sin(windData.angle * Math.PI / 180)
   ).normalize();
 
   return (
-    <arrowHelper args={[dir, new THREE.Vector3(0, 0, 0), windData.speed/5, 'cyan']} />
+    <arrowHelper args={[dir, new THREE.Vector3(0, 0, 0), windData.speed / 5, 'cyan']} />
   );
 };
 
@@ -36,20 +36,21 @@ const ARViewer = ({ trajectory, windData, onClose }) => {
 
   useEffect(() => {
     const checkARSupport = async () => {
+      if (!navigator.xr) {
+        setError('WebXR не поддерживается вашим браузером.');
+        setSupported(false);
+        return;
+      }
+
       try {
-        if ('xr' in navigator) {
-          const isSupported = await navigator.xr.isSessionSupported('immersive-ar');
-          setSupported(isSupported);
-          if (!isSupported) {
-            setError('AR не поддерживается вашим устройством');
-          }
-        } else {
-          setError('WebXR не поддерживается вашим браузером');
-          setSupported(false);
+        const isSupported = await navigator.xr.isSessionSupported('immersive-ar');
+        setSupported(isSupported);
+        if (!isSupported) {
+          setError('Ваше устройство не поддерживает AR-режим.');
         }
       } catch (err) {
         console.error('Ошибка проверки поддержки AR:', err);
-        setError('Ошибка при проверке поддержки AR');
+        setError('Ошибка при проверке поддержки AR.');
         setSupported(false);
       }
     };
@@ -77,13 +78,13 @@ const ARViewer = ({ trajectory, windData, onClose }) => {
             Закрыть
           </button>
         </div>
-        
+
         {error ? (
           <div className="ar-error">{error}</div>
         ) : supported ? (
           <>
             <ARButton 
-              sessionInit={{ 
+              sessionInit={{
                 requiredFeatures: ['hit-test'],
                 optionalFeatures: ['dom-overlay'],
                 domOverlay: { root: document.body }
@@ -99,7 +100,7 @@ const ARViewer = ({ trajectory, windData, onClose }) => {
                 <pointLight position={[10, 10, 10]} intensity={1} />
                 <TrajectoryLine trajectory={trajectory} />
                 <WindIndicator windData={windData} />
-                <gridHelper args={[10, 10]} rotation={[Math.PI/2, 0, 0]} />
+                <gridHelper args={[10, 10]} rotation={[Math.PI / 2, 0, 0]} />
                 <Text position={[0, 0.5, 0]} color="white" fontSize={0.2}>
                   Траектория пули
                 </Text>

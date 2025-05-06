@@ -13,8 +13,9 @@ import ThemeToggle from './ThemeToggle';
 import { calculateTrajectory } from '../services/ballisticCalculations';
 import ballisticData from '../data/ballisticData';
 import OfflineManager from '../services/OfflineManager';
-import { FaArrowsAlt, FaMicrophone, FaSun, FaMoon } from 'react-icons/fa';
+import { FaArrowsAlt, FaSun, FaMoon } from 'react-icons/fa';
 import './BallisticCalculator.css';
+import CameraOverlay from './CameraOverlay';
 
 const BallisticCalculator = () => {
   const [bullet, setBullet] = useState(null);
@@ -50,6 +51,15 @@ const BallisticCalculator = () => {
   const [theme, setTheme] = useState('light');
   const [customBullets, setCustomBullets] = useState([]);
 
+
+  const [showCamera, setShowCamera] = useState(false);
+
+const markers = [
+  { top: 30, left: 50, label: '100м: -2.1см' },
+  { top: 60, left: 50, label: '200м: -8.5см' },
+  { top: 80, left: 50, label: '300м: -19.2см' },
+];
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -80,15 +90,6 @@ const BallisticCalculator = () => {
   }, [conditions]);
 
   useEffect(() => {
-    setArSupported('xr' in navigator);
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
-  useEffect(() => {
-    // Проверка поддержки WebXR AR
     const checkARSupport = async () => {
       if ('xr' in navigator) {
         const supported = await navigator.xr.isSessionSupported('immersive-ar');
@@ -97,6 +98,10 @@ const BallisticCalculator = () => {
     };
     checkARSupport();
   }, []);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
 
   const calculate = () => {
     if (!bullet) {
@@ -112,9 +117,8 @@ const BallisticCalculator = () => {
 
     const maxRange = parseInt(inputValues.maxRange) || 1000;
     let step = parseInt(inputValues.step) || 50;
-    
     step = Math.max(10, Math.min(step, maxRange));
-    
+
     const calculatedResults = calculateTrajectory({
       bullet,
       initialVelocity,
@@ -176,18 +180,6 @@ const BallisticCalculator = () => {
     }
   };
 
-  const handleVoiceCommand = (type, data) => {
-    if (type === 'wind') {
-      setConditions(prev => ({
-        ...prev,
-        windSpeed: data.speed,
-        windAngle: data.angle
-      }));
-    } else if (type === 'calculate') {
-      calculate();
-    }
-  };
-
   return (
     <div className={`calculator-container ${isFieldMode ? 'field-mode' : ''}`}>
       <div className="app-header">
@@ -201,55 +193,36 @@ const BallisticCalculator = () => {
             className={`mode-switch ${isFieldMode ? 'field' : 'full'}`}
             onClick={() => setIsFieldMode(!isFieldMode)}
           >
-            {isFieldMode ? (
-              <>
-                <FaSun /> Полный режим
-              </>
-            ) : (
-              <>
-                <FaMoon /> Полевой режим
-              </>
-            )}
+            {isFieldMode ? (<><FaSun /> Полный режим</>) : (<><FaMoon /> Полевой режим</>)}
           </button>
         </div>
       </div>
 
       <div className="calculator-content">
-        
         <div className="input-section">
-        <InputForm 
-    bullet={bullet}
-    setBullet={setBullet}
-    inputValues={inputValues}
-    setInputValues={setInputValues}
-    conditions={conditions}
-    setConditions={setConditions}
-    onOpenLibrary={() => setShowLibrary(true)}
-    onOpenJournal={() => setShowJournal(true)}
-    isFieldMode={isFieldMode}
-    onCalculate={calculate}
-    windData={windData}
-    customBullets={customBullets}
-  />
-
+          <InputForm 
+            bullet={bullet}
+            setBullet={setBullet}
+            inputValues={inputValues}
+            setInputValues={setInputValues}
+            conditions={conditions}
+            setConditions={setConditions}
+            onOpenLibrary={() => setShowLibrary(true)}
+            onOpenJournal={() => setShowJournal(true)}
+            isFieldMode={isFieldMode}
+            onCalculate={calculate}
+            windData={windData}
+            customBullets={customBullets}
+          />
           {!isFieldMode && (
             <>
-               <VoiceControl 
-      setBullet={setBullet}
-      setInputValues={(newValues) => {
-        console.log('Updating input values:', newValues); // Для отладки
-        setInputValues(newValues);
-      }}
-      setConditions={(newConditions) => {
-        console.log('Updating conditions:', newConditions); // Для отладки
-        setConditions(newConditions);
-      }}
-      onCalculate={() => {
-        console.log('Calculating trajectory'); // Для отладки
-        calculate();
-      }}
-      allBullets={[...(ballisticData || []), ...(customBullets || [])]}
-    />
+              <VoiceControl 
+                setBullet={setBullet}
+                setInputValues={setInputValues}
+                setConditions={setConditions}
+                onCalculate={calculate}
+                allBullets={[...ballisticData, ...customBullets]}
+              />
               <WeatherIntegration
                 conditions={conditions}
                 setConditions={setConditions}
@@ -260,36 +233,39 @@ const BallisticCalculator = () => {
                 originalResults={originalResults}
                 setResults={setResults}
               />
-
             </>
           )}
         </div>
 
         <div className="output-section">
-        {results.length > 0 && (
-          <>
-            {!isFieldMode && <TrajectoryChart results={results} />}
-            <ResultsTable results={results} isFieldMode={isFieldMode} />
-            
-            {arSupported && (
+          {results.length > 0 && (
+            <>
+              {!isFieldMode && <TrajectoryChart results={results} />}
+              <ResultsTable results={results} isFieldMode={isFieldMode} />
               <div className="action-buttons">
-                <button 
-                  onClick={() => setShowAR(true)}
-                  className="btn-ar"
-                  disabled={results.length === 0}
-                >
-                  <FaArrowsAlt /> AR-режим
-                </button>
-              </div>
-            )}
-          </>
-        )}
-          
+  <button 
+    onClick={() => {
+      if (arSupported) {
+        setShowAR(true);
+      } else {
+        alert('Ваше устройство не поддерживает AR-режим.');
+      }
+    }}
+    className="btn-ar"
+    disabled={results.length === 0}
+  >
+    <FaArrowsAlt /> Открыть AR
+  </button>
+</div>
+
+            </>
+          )}
+
           <AIAssistant 
-            results={results} 
-            bullet={bullet} 
-            conditions={conditions} 
-            isFieldMode={isFieldMode} 
+            results={results}
+            bullet={bullet}
+            conditions={conditions}
+            isFieldMode={isFieldMode}
           />
         </div>
       </div>
@@ -297,12 +273,26 @@ const BallisticCalculator = () => {
       {showAR && (
         <div className="modal-overlay">
           <ARViewer 
-            trajectory={results} 
+            trajectory={results}
             windData={windData}
             onClose={() => setShowAR(false)}
           />
         </div>
       )}
+      
+      <>
+    <button onClick={() => setShowCamera(true)}>
+      Включить Камеру
+    </button>
+
+    {showCamera && (
+  <CameraOverlay 
+    results={results}
+    onClose={() => setShowCamera(false)}
+  />
+)}
+  </>
+
       {showLibrary && (
         <div className="modal-overlay">
           <BulletLibraryModal
@@ -316,15 +306,15 @@ const BallisticCalculator = () => {
       )}
 
       {showJournal && (
-          <div className="modal-overlay">
-            <JournalModal
-              show={showJournal}
-              onClose={() => setShowJournal(false)}
-              offlineManager={offlineManager}
-              onLoadSession={loadSessionHandler}
-            />
-          </div>
-        )}
+        <div className="modal-overlay">
+          <JournalModal
+            show={showJournal}
+            onClose={() => setShowJournal(false)}
+            offlineManager={offlineManager}
+            onLoadSession={loadSessionHandler}
+          />
+        </div>
+      )}
     </div>
   );
 };
