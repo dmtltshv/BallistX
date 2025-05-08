@@ -2,194 +2,258 @@ import { useState, useEffect, useRef } from 'react';
 import { FaMicrophone, FaMicrophoneSlash, FaExclamationTriangle } from 'react-icons/fa';
 
 const VoiceControl = ({
+  bullet,
+  inputValues,
+  conditions,
   setBullet,
   setInputValues,
   setConditions,
-  onCalculate,
-  allBullets = []
+  allBullets = [],
+  setShouldCalculate
 }) => {
   const [status, setStatus] = useState('Нажмите микрофон для начала');
   const [isListening, setIsListening] = useState(false);
   const [browserSupport, setBrowserSupport] = useState(true);
+  const [helpActive, setHelpActive] = useState(false);
+
   const recognitionRef = useRef(null);
+  const bulletRef = useRef(null);
+  const inputValuesRef = useRef({});
+  const conditionsRef = useRef({});
+  const allBulletsRef = useRef([]);
+
+  useEffect(() => { bulletRef.current = bullet; }, [bullet]);
+  useEffect(() => { inputValuesRef.current = inputValues; }, [inputValues]);
+  useEffect(() => { conditionsRef.current = conditions; }, [conditions]);
+  useEffect(() => { allBulletsRef.current = allBullets; }, [allBullets]);
 
   useEffect(() => {
-    const initSpeechRecognition = () => {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setBrowserSupport(false);
+      setStatus('Ваш браузер не поддерживает голосовой ввод');
+      return;
+    }
 
-      if (!SpeechRecognition) {
-        setBrowserSupport(false);
-        setStatus('Ваш браузер не поддерживает голосовой ввод');
+    const recognizer = new SpeechRecognition();
+    recognitionRef.current = recognizer;
+
+    recognizer.continuous = true;
+    recognizer.interimResults = false;
+    recognizer.lang = 'ru-RU';
+    recognizer._forceStopped = false;
+    recognizer._isActive = false;
+
+    recognizer.onstart = () => {
+      recognizer._isActive = true;
+      setIsListening(true);
+      if (!helpActive) {
+        setStatus('Говорите...');
+      }
+    };
+
+    recognizer.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join(' ')
+        .trim()
+        .toLowerCase();
+
+      if (!transcript) return;
+
+      if (transcript.includes('стоп')) {
+        recognizer._forceStopped = true;
+        recognizer.stop();
+        setStatus('Остановлено по команде');
+        setHelpActive(false);
         return;
       }
 
-      recognitionRef.current = new SpeechRecognition();
-      const recognizer = recognitionRef.current;
-
-      recognizer.continuous = true;
-      recognizer.interimResults = true;
-      recognizer.lang = 'ru-RU';
-
-      recognizer.onstart = () => {
-        setIsListening(true);
-        setStatus('Говорите команду...');
-      };
-
-      recognizer.onend = () => {
-        setIsListening(false);
-        setStatus('Микрофон отключен');
-      };
-
-      recognizer.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join(' ')
-          .trim();
-
-        if (transcript) {
-          console.log('Распознано:', transcript);
-          processVoiceCommand(transcript);
-        }
-      };
-
-      recognizer.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-
-        if (event.error === 'network') {
-          setStatus('Ошибка сети. Проверьте подключение к интернету');
-          setTimeout(() => setStatus('Нажмите микрофон для начала'), 3000);
-          return;
-        }
-
-        const errorMessages = {
-          'no-speech': 'Речь не обнаружена',
-          'audio-capture': 'Не удалось захватить аудио',
-          'not-allowed': 'Доступ к микрофону запрещен',
-          'language-not-supported': 'Русский язык не поддерживается',
-          default: `Ошибка: ${event.error}`
-        };
-
-        setStatus(errorMessages[event.error] || errorMessages.default);
-      };
+      processVoiceCommand(transcript, {
+        bullet: bulletRef.current,
+        inputValues: inputValuesRef.current,
+        conditions: conditionsRef.current,
+        allBullets: allBulletsRef.current
+      });
     };
 
-    const checkMicrophonePermission = async () => {
-      try {
-        if (navigator.permissions) {
-          const permission = await navigator.permissions.query({ name: 'microphone' });
-          permission.onchange = () => {
-            if (permission.state === 'denied') {
-              setBrowserSupport(false);
-              setStatus('Доступ к микрофону запрещен');
-            }
-          };
-        }
-      } catch (e) {
-        console.log('Permission API not supported');
+    recognizer.onerror = (event) => {
+      if (!recognizer._forceStopped) {
+        console.error('Speech recognition error:', event.error);
+        setStatus(`Ошибка: ${event.error}`);
+      }
+      setIsListening(false);
+    };
+
+    recognizer.onend = () => {
+      recognizer._isActive = false;
+      if (!recognizer._forceStopped) {
+        setTimeout(() => {
+          try {
+            recognizer.start();
+          } catch (err) {
+            console.warn('Ошибка перезапуска микрофона:', err.message);
+          }
+        }, 300);
+      } else {
+        setIsListening(false);
+        setStatus('Микрофон выключен');
       }
     };
-
-    initSpeechRecognition();
-    checkMicrophonePermission();
 
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      recognizer._forceStopped = true;
+      recognizer.stop();
     };
   }, []);
 
-  const processVoiceCommand = (command) => {
-    const lowerCommand = command.toLowerCase();
-    console.log('Обработка команды:', lowerCommand);
-
-    const words = lowerCommand.split(/\s+/);
+  const processVoiceCommand = (text, { bullet = null, inputValues = {}, conditions = {}, allBullets = [] } = {}) => {
     let triggerCalculation = false;
 
-    for (let i = 0; i < words.length; i++) {
-      if (words[i] === 'калибр') {
-        const num = parseFloat(words[i + 1]);
-        if (!isNaN(num)) {
-          const foundBullet = allBullets.find(b => parseFloat(b.caliber) === num);
-          if (foundBullet) {
-            setBullet(foundBullet);
-            setStatus(`Выбран калибр ${num} мм`);
-          } else {
-            setStatus(`Калибр ${num} мм не найден`);
-          }
-        }
-      }
+    if (text.includes('помощь')) {
+      setHelpActive(true);
+      setStatus('Доступные голосовые команды:');
+      return;
+    }
 
-      if (words[i] === 'скорость') {
-        const num = parseInt(words[i + 1]);
-        if (!isNaN(num)) {
-          setInputValues(prev => ({ ...prev, velocity: num }));
-          setStatus(`Установлена скорость: ${num} м/с`);
-        }
-      }
+    if (helpActive) {
+      setHelpActive(false);
+    }
 
-      if (words[i] === 'ветер') {
-        const speed = parseInt(words[i + 1]);
-        const angle = parseInt(words[i + 2]) || 90;
-        if (!isNaN(speed)) {
-          setConditions(prev => ({ ...prev, windSpeed: speed, windAngle: angle }));
-          setStatus(`Ветер: ${speed} м/с, угол ${angle}°`);
-        }
-      }
+    if (text.includes('расчитай') || text.includes('расчет') || text.includes('расчитать')) {
+      triggerCalculation = true;
+    }
 
-      if (words[i] === 'пристрелка') {
-        const distance = parseInt(words[i + 1]);
-        if (!isNaN(distance)) {
-          setInputValues(prev => ({ ...prev, zeroRange: distance }));
-          setStatus(`Установлена пристрелка: ${distance} м`);
+    if (text.includes('калибр')) {
+      const match = text.match(/калибр\s(\d+(\.\d+)?)/);
+      if (match) {
+        const caliber = parseFloat(match[1]);
+        const foundBullet = allBullets.find(b => parseFloat(b.caliber) === caliber);
+        if (foundBullet) {
+          setBullet(foundBullet);
+          setStatus(`Выбран калибр: ${caliber} мм`);
         }
-      }
-
-      if (words[i] === 'температура') {
-        const temp = parseInt(words[i + 1]);
-        if (!isNaN(temp)) {
-          setConditions(prev => ({ ...prev, temperature: temp }));
-          setStatus(`Температура установлена: ${temp}°C`);
-        }
-      }
-
-      if (words[i] === 'давление') {
-        const pressure = parseInt(words[i + 1]);
-        if (!isNaN(pressure)) {
-          setConditions(prev => ({ ...prev, pressure }));
-          setStatus(`Давление установлено: ${pressure} мм рт.ст.`);
-        }
-      }
-
-      if (words[i].includes('расчитай') || words[i].includes('расчет') || words[i].includes('расчитать')) {
-        triggerCalculation = true;
       }
     }
 
+    if (text.includes('пуля') || text.includes('патрон')) {
+      const match = text.match(/(?:пуля|патрон)\s([\w\d]+)/i);
+      if (match) {
+        const keyword = match[1].toLowerCase();
+        const foundBullet = allBullets.find(b => b.name.toLowerCase().includes(keyword));
+        if (foundBullet) {
+          setBullet(foundBullet);
+          setStatus(`Выбрана пуля: ${foundBullet.caliber} ${foundBullet.name}`);
+        }
+      }
+    }
+
+    if (text.includes('скорость')) {
+      const match = text.match(/скорость\s(\d+)/);
+      if (match) {
+        setInputValues(prev => ({ ...prev, velocity: parseInt(match[1]) }));
+        setStatus(`Скорость: ${match[1]} м/с`);
+      }
+    }
+
+    if (text.includes('ветер')) {
+      const match = text.match(/ветер\s(\d+)(?:.*?(\d+))?/);
+      if (match) {
+        const speed = parseInt(match[1]);
+        const angle = parseInt(match[2]) || 90;
+        setConditions(prev => ({ ...prev, windSpeed: speed, windAngle: angle }));
+        setStatus(`Ветер: ${speed} м/с угол ${angle}°`);
+      }
+    }
+
+    if (text.includes('пристрелка')) {
+      const match = text.match(/пристрелка\s(\d+)/);
+      if (match) {
+        setInputValues(prev => ({ ...prev, zeroRange: parseInt(match[1]) }));
+        setStatus(`Пристрелка: ${match[1]} м`);
+      }
+    }
+
+    if (text.includes('температура')) {
+      const match = text.match(/температура\s(-?\d+)/);
+      if (match) {
+        setConditions(prev => ({ ...prev, temperature: parseInt(match[1]) }));
+        setStatus(`Температура: ${match[1]}°C`);
+      }
+    }
+
+    if (text.includes('давление')) {
+      const match = text.match(/давление\s(\d+)/);
+      if (match) {
+        setConditions(prev => ({ ...prev, pressure: parseInt(match[1]) }));
+        setStatus(`Давление: ${match[1]} мм рт.ст.`);
+      }
+    }
+
+    if (text.includes('максимальная') || text.includes('дистанция')) {
+      const match = text.match(/(?:максимальная\s)?дистанция\s(\d+)/);
+      if (match) {
+        setInputValues(prev => ({ ...prev, maxRange: parseInt(match[1]) }));
+        setStatus(`Максимальная дистанция: ${match[1]} м`);
+      }
+    }
+
+    if (text.includes('шаг')) {
+      const match = text.match(/шаг\s(\d+)/);
+      if (match) {
+        setInputValues(prev => ({ ...prev, step: parseInt(match[1]) }));
+        setStatus(`Шаг: ${match[1]} м`);
+      }
+    }
+
+    if (text.includes('прицел') || text.includes('высота')) {
+      const match = text.match(/(?:прицел|высота)\s(\d+)/);
+      if (match) {
+        setInputValues(prev => ({ ...prev, scopeHeight: parseInt(match[1]) }));
+        setStatus(`Высота прицела: ${match[1]} мм`);
+      }
+    }
+
+    if (text.includes('сброс')) {
+      setBullet(null);
+      setInputValues({
+        velocity: '',
+        zeroRange: 100,
+        scopeHeight: 40,
+        maxRange: 1000,
+        step: 50,
+      });
+      setConditions({
+        temperature: 15,
+        pressure: 760,
+        humidity: 50,
+        windSpeed: 0,
+        windAngle: 90,
+      });
+      setStatus('Параметры сброшены.');
+      return;
+    }
+
     if (triggerCalculation) {
-      setTimeout(() => {
-        onCalculate();
-        setStatus('Запущен расчет траектории');
-      }, 500); // Задержка чтобы успели примениться все set
+      if (bulletRef.current && bulletRef.current.name && inputValuesRef.current.velocity) {
+        setShouldCalculate(true);
+        setStatus('Рассчитываю траекторию...');
+      } else {
+        setStatus('Пуля или скорость не выбраны. Проверьте данные.');
+      }
     }
   };
 
   const toggleListening = () => {
     if (!browserSupport) return;
-
-    try {
-      if (isListening) {
-        recognitionRef.current.stop();
-      } else {
-        setStatus('Подключение к сервису распознавания...');
-        recognitionRef.current.start();
-      }
-    } catch (error) {
-      console.error('Microphone access error:', error);
-      setStatus('Ошибка доступа к микрофону');
-      setBrowserSupport(false);
+    const recognizer = recognitionRef.current;
+    if (isListening) {
+      recognizer._forceStopped = true;
+      recognizer.stop();
+    } else {
+      recognizer._forceStopped = false;
+      if (!recognizer._isActive) recognizer.start();
     }
   };
 
@@ -200,34 +264,34 @@ const VoiceControl = ({
         disabled={!browserSupport}
         className={`voice-button ${isListening ? 'listening' : ''}`}
       >
-        {isListening ? (
-          <>
-            <FaMicrophoneSlash /> Остановить
-          </>
-        ) : (
-          <>
-            <FaMicrophone /> Голосовое управление
-          </>
-        )}
+        {isListening ? (<><FaMicrophoneSlash /> Остановить</>) : (<><FaMicrophone /> Голосовое управление</>)}
         {!browserSupport && <FaExclamationTriangle className="warning-icon" />}
       </button>
 
-      <div className={`voice-status ${status.includes('Ошибка') ? 'error' : ''}`}>
+      <div className={`voice-status ${status.includes('Ошибка') ? 'error' : ''}`} style={{ whiteSpace: 'pre-line' }}>
         {status}
       </div>
 
-      <div className="voice-tips">
-        <p>Примеры команд:</p>
-        <ul>
-          <li>"Калибр 7.62 мм"</li>
-          <li>"Скорость 820 м/с"</li>
-          <li>"Ветер 5 м/с 90 градусов"</li>
-          <li>"Пристрелка 100 метров"</li>
-          <li>"Температура 20 градусов"</li>
-          <li>"Давление 760 миллиметров"</li>
-          <li>"Рассчитай траекторию"</li>
-        </ul>
-      </div>
+      {helpActive && (
+        <div className="voice-help">
+          <p>Доступные команды:</p>
+          <ul>
+            <li>«Калибр 7.62»</li>
+            <li>«Пуля FMJ»</li>
+            <li>«Скорость 820 м/с»</li>
+            <li>«Ветер 5 90»</li>
+            <li>«Пристрелка 100 метров»</li>
+            <li>«Температура 20 градусов»</li>
+            <li>«Давление 760 миллиметров»</li>
+            <li>«Максимальная дистанция 800»</li>
+            <li>«Шаг 50»</li>
+            <li>«Высота прицела 40»</li>
+            <li>«Рассчитай траекторию»</li>
+            <li>«Сброс»</li>
+            <li>«Стоп»</li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

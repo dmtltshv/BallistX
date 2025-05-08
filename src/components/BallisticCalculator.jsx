@@ -7,13 +7,12 @@ import CorrectionTools from './CorrectionTools';
 import BulletLibraryModal from './BulletLibraryModal';
 import JournalModal from './JournalModal';
 import AIAssistant from './AIAssistant';
-import ARViewer from './ARViewer';
 import VoiceControl from './VoiceControl';
 import ThemeToggle from './ThemeToggle';
 import { calculateTrajectory } from '../services/ballisticCalculations';
 import ballisticData from '../data/ballisticData';
 import OfflineManager from '../services/OfflineManager';
-import { FaArrowsAlt, FaSun, FaMoon } from 'react-icons/fa';
+import {FaSun, FaMoon } from 'react-icons/fa';
 import './BallisticCalculator.css';
 import CameraOverlay from './CameraOverlay';
 
@@ -41,9 +40,7 @@ const BallisticCalculator = () => {
   const [isFieldMode, setIsFieldMode] = useState(() => {
     return JSON.parse(localStorage.getItem('ballistic-field-mode')) || false;
   });
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [showAR, setShowAR] = useState(false);
-  const [arSupported, setArSupported] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);;
   const [windData, setWindData] = useState({
     speed: conditions.windSpeed,
     angle: conditions.windAngle
@@ -89,19 +86,19 @@ const markers = [
     });
   }, [conditions]);
 
-  useEffect(() => {
-    const checkARSupport = async () => {
-      if ('xr' in navigator) {
-        const supported = await navigator.xr.isSessionSupported('immersive-ar');
-        setArSupported(supported);
-      }
-    };
-    checkARSupport();
-  }, []);
-
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
+
+  const [shouldCalculate, setShouldCalculate] = useState(false);
+
+  useEffect(() => {
+    if (shouldCalculate) {
+      calculate();
+      setShouldCalculate(false);
+    }
+  }, [shouldCalculate]);
+
 
   const calculate = () => {
     if (!bullet) {
@@ -184,8 +181,7 @@ const markers = [
     <div className={`calculator-container ${isFieldMode ? 'field-mode' : ''}`}>
       <div className="app-header">
         <h1>
-          <span className="app-name">BallisticCalc</span>
-          <span className="app-version">v1.0</span>
+          <span className="app-name">BallistX</span>
         </h1>
         <div className="app-controls">
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
@@ -216,13 +212,17 @@ const markers = [
           />
           {!isFieldMode && (
             <>
-              <VoiceControl 
+              <VoiceControl
+                bullet={bullet}
+                inputValues={inputValues}
+                conditions={conditions}
                 setBullet={setBullet}
                 setInputValues={setInputValues}
                 setConditions={setConditions}
-                onCalculate={calculate}
                 allBullets={[...ballisticData, ...customBullets]}
+                setShouldCalculate={setShouldCalculate}
               />
+
               <WeatherIntegration
                 conditions={conditions}
                 setConditions={setConditions}
@@ -242,22 +242,6 @@ const markers = [
             <>
               {!isFieldMode && <TrajectoryChart results={results} />}
               <ResultsTable results={results} isFieldMode={isFieldMode} />
-              <div className="action-buttons">
-  <button 
-    onClick={() => {
-      if (arSupported) {
-        setShowAR(true);
-      } else {
-        alert('Ваше устройство не поддерживает AR-режим.');
-      }
-    }}
-    className="btn-ar"
-    disabled={results.length === 0}
-  >
-    <FaArrowsAlt /> Открыть AR
-  </button>
-</div>
-
             </>
           )}
 
@@ -269,17 +253,6 @@ const markers = [
           />
         </div>
       </div>
-
-      {showAR && (
-        <div className="modal-overlay">
-          <ARViewer 
-            trajectory={results}
-            windData={windData}
-            onClose={() => setShowAR(false)}
-          />
-        </div>
-      )}
-      
       <>
     <button onClick={() => setShowCamera(true)}>
       Включить Камеру
