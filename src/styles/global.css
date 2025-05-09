@@ -499,6 +499,10 @@ label {
   white-space: nowrap;
   font-size: 0.9rem;
   transition: transform 0.2s ease;
+  border: none;
+  box-shadow: none;
+
+  transition: top 0.2s ease-out;
 }
 
 .green-marker { border: 2px solid lime; }
@@ -507,7 +511,9 @@ label {
 
 .pulse {
   animation: pulse-animation 1.5s infinite;
+  transform-origin: center;
 }
+
 
 @keyframes pulse-animation {
   0% { transform: scale(1); }

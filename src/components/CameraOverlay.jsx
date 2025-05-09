@@ -10,6 +10,11 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const fieldOfView = 60;
   const calibrationOffset = 0;
 
+  const uniqueResults = results.filter(
+    (r, index, self) => index === self.findIndex(t => t.range === r.range)
+  );
+  
+
   useEffect(() => {
     const askPermission = async () => {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
