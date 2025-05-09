@@ -529,3 +529,11 @@ label {
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
 }
+.toggle-btn {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid #00ffcc;
+  border-radius: 8px;
+}

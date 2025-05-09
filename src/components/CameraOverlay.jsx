@@ -4,9 +4,12 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const videoRef = useRef(null);
   const [streamStarted, setStreamStarted] = useState(false);
   const [error, setError] = useState('');
-  const [tiltAngle, setTiltAngle] = useState(0);
+  const [rawTilt, setRawTilt] = useState(0);
+  const [smoothedTilt, setSmoothedTilt] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
+  const [showAllMarkers, setShowAllMarkers] = useState(false);
 
+  const smoothedTiltRef = useRef(0);
   const fieldOfView = 60;
   const calibrationOffset = 0;
   const MIN_DISTANCE = 6;
@@ -22,7 +25,14 @@ export default function CameraOverlay({ onClose, results = [] }) {
     return 'red-marker';
   };
 
-  // Обработка ориентации
+  useEffect(() => {
+    const interval = setInterval(() => {
+      smoothedTiltRef.current = smoothedTiltRef.current * 0.9 + rawTilt * 0.1;
+      setSmoothedTilt(smoothedTiltRef.current);
+    }, 50);
+    return () => clearInterval(interval);
+  }, [rawTilt]);
+
   useEffect(() => {
     const askPermission = async () => {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -42,7 +52,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
     const handleOrientation = (event) => {
       if (event.beta != null) {
         const correctedTilt = -(event.beta - 90) + calibrationOffset;
-        setTiltAngle(correctedTilt);
+        setRawTilt(correctedTilt);
       }
     };
 
@@ -53,8 +63,8 @@ export default function CameraOverlay({ onClose, results = [] }) {
   }, []);
 
   useEffect(() => {
-    setShowWarning(Math.abs(tiltAngle) > 80);
-  }, [tiltAngle]);
+    setShowWarning(Math.abs(smoothedTilt) > 80);
+  }, [smoothedTilt]);
 
   const startCamera = async () => {
     try {
@@ -88,11 +98,16 @@ export default function CameraOverlay({ onClose, results = [] }) {
     onClose();
   };
 
-  // Подготовка маркеров
+  // Фильтрация по предпочтениям
+  const filteredResults = showAllMarkers
+    ? results
+    : results.filter(r => [100, 300, 500, 800, 1000].includes(r.range));
+
+  // Вычисление маркеров
   const positionedMarkers = [];
-  results.forEach((r) => {
+  filteredResults.forEach((r) => {
     const markerAngle = calculateMarkerAngle(r.drop, r.range);
-    const relativeAngle = markerAngle - tiltAngle;
+    const relativeAngle = markerAngle - smoothedTilt;
     if (Math.abs(relativeAngle) > fieldOfView / 2) return;
 
     let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
@@ -103,7 +118,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
       if (topPercent > 95) break;
     }
 
-    positionedMarkers.push({ ...r, top: topPercent });
+    positionedMarkers.push({ ...r, top: topPercent, relativeAngle });
   });
 
   return (
@@ -118,7 +133,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
           </div>
 
           {positionedMarkers.map((r, index) => {
-            const isTargeted = Math.abs(calculateMarkerAngle(r.drop, r.range) - tiltAngle) < 2;
+            const isTargeted = Math.abs(r.relativeAngle) < 2;
             const colorClass = getMarkerColor(r.range);
 
             return (
@@ -138,7 +153,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
             );
           })}
 
-          <div className="tilt-indicator">Угол: {tiltAngle.toFixed(1)}°</div>
+          <div className="tilt-indicator">Угол: {smoothedTilt.toFixed(1)}°</div>
 
           {showWarning && (
             <div className="warning-overlay">
@@ -157,6 +172,9 @@ export default function CameraOverlay({ onClose, results = [] }) {
         )}
         <button className="btn-glow close-btn" onClick={stopCamera}>
           Закрыть
+        </button>
+        <button className="btn-glow toggle-btn" onClick={() => setShowAllMarkers(prev => !prev)}>
+          {showAllMarkers ? 'Скрыть лишние' : 'Показать все'}
         </button>
         {error && <div className="camera-error">{error}</div>}
       </div>
