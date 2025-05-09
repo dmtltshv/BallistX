@@ -217,6 +217,7 @@ label {
 
 /* === Results Table === */
 .results-table table {
+  overflow-x: auto;
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -605,4 +606,8 @@ label {
   color: red;
   font-weight: bold;
   margin-top: 1rem;
+}
+
+.results-table {
+  min-width: 600px; /* или больше — зависит от количества колонок */
 }
