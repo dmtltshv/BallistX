@@ -215,8 +215,7 @@ label {
   margin-bottom: 1.5rem;
 }
 .results-table {
-  overflow-x: scroll;
-  width: 100%;
+  overflow-x: auto;
 }
 
 /* === Results Table === */

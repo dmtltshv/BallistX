@@ -5,7 +5,7 @@ const ResultsTable = ({ results, isFieldMode }) => {
     <div className={`results-table card-glass ${isFieldMode ? 'field-mode' : ''}`}>
       <h3 className="section-title" data-icon="📊">Результаты расчета</h3>
       <div className="table-container">
-        <table className="results-table">
+        <table className="results-table full-width">
           <thead>
             <tr>
               <th>Дистанция (м)</th>
