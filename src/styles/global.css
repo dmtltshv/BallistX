@@ -487,3 +487,30 @@ label {
   font-size: 1rem;
   z-index: 3;
 }
+
+.marker {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: white;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.green-marker { border: 2px solid lime; }
+.yellow-marker { border: 2px solid gold; }
+.red-marker { border: 2px solid crimson; }
+
+.pulse {
+  animation: pulse-animation 1.5s infinite;
+}
+
+@keyframes pulse-animation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
