@@ -67,8 +67,6 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
       alert('Ошибка сохранения пули');
     }
   };
-  ________________________________________
-  
 
   const handleDeleteBullet = async (id) => {
     if (!window.confirm('Удалить этот патрон из библиотеки?')) return;
