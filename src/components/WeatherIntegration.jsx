@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { FaCloudSun, FaExclamationTriangle } from 'react-icons/fa';
-import './WeatherIntegration.css';
 
 const WeatherIntegration = ({ conditions, setConditions, disabled }) => {
   const [status, setStatus] = useState('Готов к запросу');
@@ -8,20 +7,20 @@ const WeatherIntegration = ({ conditions, setConditions, disabled }) => {
 
   const fetchWeather = async () => {
     if (disabled) {
-      setStatus('Требуется интернет-соединение');
+      setStatus('⛔ Требуется интернет-соединение');
       setTimeout(() => setStatus('Готов к запросу'), 3000);
       return;
     }
 
     setIsLoading(true);
-    setStatus('Определение местоположения...');
+    setStatus('📍 Определение местоположения...');
 
     try {
       const position = await getPosition();
-      setStatus('Запрос погодных данных...');
+      setStatus('🌦️ Запрос погодных данных...');
       const weather = await getWeather(position.coords);
       updateConditions(weather);
-      setStatus('Данные обновлены');
+      setStatus('✅ Данные обновлены');
     } catch (error) {
       setStatus(`Ошибка: ${error.message}`);
     } finally {
@@ -47,7 +46,7 @@ const WeatherIntegration = ({ conditions, setConditions, disabled }) => {
   const getWeather = async (coords) => {
     const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${coords.latitude}&lon=${coords.longitude}&appid=${apiKey}&units=metric&lang=ru`;
-    
+
     const response = await fetch(url);
     if (!response.ok) throw new Error('Ошибка запроса погоды');
     return await response.json();
@@ -65,17 +64,16 @@ const WeatherIntegration = ({ conditions, setConditions, disabled }) => {
   };
 
   return (
-    <div className="weather-integration">
+    <div className="weather-integration card-glass">
       <button 
         onClick={fetchWeather}
         disabled={isLoading || disabled}
-        className="weather-button"
+        className="btn-glow weather-button"
       >
         <FaCloudSun /> Автозаполнение погоды
       </button>
       <div className={`weather-status ${status.includes('Ошибка') ? 'error' : ''}`}>
-        {status.includes('Ошибка') ? <FaExclamationTriangle /> : null}
-        {status}
+        {status.includes('Ошибка') && <FaExclamationTriangle />} {status}
       </div>
     </div>
   );

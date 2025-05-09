@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import BallisticCalculator from './components/BallisticCalculator';
 import ThemeToggle from './components/ThemeToggle';
 import './App.css';
+import './styles/global.css';
 
 function App() {
   const [theme, setTheme] = useState(() => {

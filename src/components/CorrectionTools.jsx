@@ -66,7 +66,6 @@ const CorrectionTools = ({ results, originalResults, setResults }) => {
 
     let correctedResults = [...originalResults];
 
-    // Apply angle correction
     if (angleRad) {
       const factor = Math.cos(angleRad);
       correctedResults = correctedResults.map(result => ({
@@ -80,7 +79,6 @@ const CorrectionTools = ({ results, originalResults, setResults }) => {
       }));
     }
 
-    // Apply tilt correction
     if (tiltRad) {
       correctedResults = correctedResults.map(result => {
         const distance = result.range;
@@ -120,11 +118,11 @@ const CorrectionTools = ({ results, originalResults, setResults }) => {
   };
 
   return (
-    <div className="correction-tools">
-      <h3>Коррекции</h3>
+    <div className="correction-tools card-glass">
+      <h3 className="section-title" data-icon="🎯">Коррекции</h3>
       
       <div className="correction-section">
-        <h4>Угол места</h4>
+        <h4>📐 Угол места</h4>
         <div className="form-row">
           <div className="form-group">
             <label>Дистанция (м):</label>
@@ -143,14 +141,14 @@ const CorrectionTools = ({ results, originalResults, setResults }) => {
             />
           </div>
         </div>
-        <button onClick={calculateAngleCorrection}>Рассчитать угол</button>
-        <div className="correction-result">
+        <button onClick={calculateAngleCorrection} className="btn-glow">Рассчитать угол</button>
+        <div className="correction-result text-sm">
           Угол: {angleCorrection.angle}°, Коэффициент: {angleCorrection.factor}
         </div>
       </div>
 
       <div className="correction-section">
-        <h4>Наклон оружия</h4>
+        <h4>⚖️ Наклон оружия</h4>
         <div className="form-row">
           <div className="form-group">
             <label>Угол наклона (°):</label>
@@ -171,15 +169,13 @@ const CorrectionTools = ({ results, originalResults, setResults }) => {
             </select>
           </div>
         </div>
-        <button onClick={calculateTiltCorrection}>Рассчитать наклон</button>
-        <div className="correction-result">
+        <button onClick={calculateTiltCorrection} className="btn-glow">Рассчитать наклон</button>
+        <div className="correction-result text-sm">
           Смещение: {tiltCorrection.shift} см/100м, Поправка по ветру: {tiltCorrection.windCorrection} MOA
         </div>
       </div>
 
-      <button onClick={resetCorrections} className="reset-btn">
-        Сбросить коррекции
-      </button>
+      <button onClick={resetCorrections} className="btn-glow">Сбросить коррекции</button>
     </div>
   );
 };

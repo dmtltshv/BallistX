@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaBook, FaHistory, FaCalculator } from 'react-icons/fa';
 import ballisticData from '../data/ballisticData';
-import './InputForm.css';
 
 const InputForm = ({
   bullet,
@@ -21,88 +20,77 @@ const InputForm = ({
   const [filteredBullets, setFilteredBullets] = useState([]);
   const [selectedCaliber, setSelectedCaliber] = useState('');
 
-  // Получаем все пули (стандартные + пользовательские)
   const allBullets = [...ballisticData, ...customBullets];
 
   useEffect(() => {
-    // Уникальные калибры из всех пуль
     const uniqueCalibers = [...new Set(allBullets.map(b => b.caliber))];
     setCalibers(uniqueCalibers);
-    
-    // Если выбрана пуля, устанавливаем соответствующий калибр
+
     if (bullet) {
       setSelectedCaliber(bullet.caliber);
       const filtered = allBullets.filter(b => b.caliber === bullet.caliber);
       setFilteredBullets(filtered);
     }
-  }, [bullet, customBullets]); // Добавляем customBullets в зависимости
+  }, [bullet, customBullets]);
 
   const handleCaliberChange = (e) => {
     const caliber = e.target.value;
     setSelectedCaliber(caliber);
     const filtered = allBullets.filter(b => b.caliber === caliber);
     setFilteredBullets(filtered);
-    setBullet(null); // Сбрасываем выбранную пулю при смене калибра
+    setBullet(null);
   };
 
   const handleBulletSelect = (e) => {
     const selectedId = e.target.value;
     if (!selectedId) return;
-    
     const selected = allBullets.find(b => b.id === selectedId);
     setBullet(selected);
   };
 
   return (
-    <div className={`input-form ${isFieldMode ? 'field-mode' : ''}`}>
+    <div className={`input-form card-glass ${isFieldMode ? 'field-mode' : ''}`}>
       <div className="form-card">
-        <h2 className="form-title">
-          <FaCalculator /> Параметры расчета
-        </h2>
-        
-        <div className="form-group">
-        <label>Калибр:</label>
-        <select 
-          value={selectedCaliber}
-          onChange={handleCaliberChange}
-          className="form-control"
-        >
-          <option value="">Выберите калибр</option>
-          {calibers.map(caliber => (
-            <option key={caliber} value={caliber}>{caliber}</option>
-          ))}
-        </select>
-      </div>
+        <h2 className="section-title" data-icon="🧮">Параметры расчета</h2>
 
-      <div className="form-group">
-        <label>Пуля:</label>
-        <div className="bullet-select-wrapper">
-          <select 
-            value={bullet?.id || ''}
-            onChange={handleBulletSelect}
-            className="form-control"
-            disabled={!selectedCaliber}
-          >
-            <option value="">{selectedCaliber ? 'Выберите пулю' : 'Сначала выберите калибр'}</option>
-            {filteredBullets.map(b => (
-              <option key={b.id} value={b.id}>
-                {b.name} ({b.weight}г, BC: {b.bc})
-              </option>
+        <div className="form-group">
+          <label>Калибр:</label>
+          <select value={selectedCaliber} onChange={handleCaliberChange} className="form-control">
+            <option value="">Выберите калибр</option>
+            {calibers.map(caliber => (
+              <option key={caliber} value={caliber}>{caliber}</option>
             ))}
           </select>
-          {!isFieldMode && (
-            <button onClick={onOpenLibrary} className="library-btn">
-              <FaBook />
-            </button>
+        </div>
+
+        <div className="form-group">
+          <label>Пуля:</label>
+          <div className="bullet-select-wrapper">
+            <select
+              value={bullet?.id || ''}
+              onChange={handleBulletSelect}
+              className="form-control"
+              disabled={!selectedCaliber}
+            >
+              <option value="">{selectedCaliber ? 'Выберите пулю' : 'Сначала выберите калибр'}</option>
+              {filteredBullets.map(b => (
+                <option key={b.id} value={b.id}>
+                  {b.name} ({b.weight}г, BC: {b.bc})
+                </option>
+              ))}
+            </select>
+            {!isFieldMode && (
+              <button onClick={onOpenLibrary} className="btn-glow library-btn">
+                <FaBook />
+              </button>
+            )}
+          </div>
+          {bullet && (
+            <div className="selected-bullet-info">
+              Выбрано: {bullet.caliber} {bullet.name} (BC: {bullet.bc})
+            </div>
           )}
         </div>
-        {bullet && (
-          <div className="selected-bullet-info">
-            Выбрано: {bullet.caliber} {bullet.name} (BC: {bullet.bc})
-          </div>
-        )}
-      </div>
-
 
         <div className="form-row">
           <div className="form-group">
@@ -161,8 +149,8 @@ const InputForm = ({
       </div>
 
       <div className="form-card weather-card">
-        <h3 className="weather-title">Погодные условия</h3>
-        
+        <h3 className="section-title" data-icon="☁️">Погодные условия</h3>
+
         <div className="form-row">
           <div className="form-group">
             <label>Ветер (м/с):</label>
@@ -210,17 +198,11 @@ const InputForm = ({
       </div>
 
       <div className="action-buttons">
-        <button 
-          className="btn-calculate"
-          onClick={onCalculate}
-        >
-          Рассчитать траекторию
+        <button className="btn-glow" onClick={onCalculate}>
+          <FaCalculator /> Рассчитать траекторию
         </button>
         {!isFieldMode && (
-          <button 
-            className="btn-journal"
-            onClick={onOpenJournal}
-          >
+          <button className="btn-glow" onClick={onOpenJournal}>
             <FaHistory /> Журнал
           </button>
         )}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { FaTimes, FaPlus, FaTrash, FaCheck } from 'react-icons/fa';
-import './BulletLibraryModal.css';
 
 const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }) => {
   const [customBullets, setCustomBullets] = useState([]);
@@ -82,31 +81,22 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
 
   return (
     <div className="modal-overlay">
-      <div className="bullet-library-modal">
+      <div className="bullet-library-modal card-glass">
         <div className="modal-header">
-          <h2>Библиотека патронов</h2>
-          <button onClick={onClose} className="close-btn">
+          <h2 className="section-title" data-icon="🧱">Библиотека патронов</h2>
+          <button onClick={onClose} className="btn-glow">
             <FaTimes />
           </button>
         </div>
 
         <div className="modal-tabs">
-          <button 
-            className={`tab-btn ${activeTab === 'library' ? 'active' : ''}`}
-            onClick={() => setActiveTab('library')}
-          >
+          <button className={`tab-btn ${activeTab === 'library' ? 'active' : ''}`} onClick={() => setActiveTab('library')}>
             Стандартные
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`}
-            onClick={() => setActiveTab('custom')}
-          >
+          <button className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} onClick={() => setActiveTab('custom')}>
             Мои патроны
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`}
-            onClick={() => setActiveTab('add')}
-          >
+          <button className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`} onClick={() => setActiveTab('add')}>
             Добавить
           </button>
         </div>
@@ -115,7 +105,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
           {activeTab === 'library' && (
             <div className="bullet-list">
               {bullets.map(bullet => (
-                <div key={bullet.id} className="bullet-item">
+                <div key={bullet.id} className="bullet-item card-glass">
                   <div className="bullet-info">
                     <h3>{bullet.caliber} {bullet.name}</h3>
                     <div className="bullet-details">
@@ -123,10 +113,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
                       <span>BC: {bullet.bc}</span>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleBulletSelect(bullet)}
-                    className="select-btn"
-                  >
+                  <button onClick={() => handleBulletSelect(bullet)} className="btn-glow select-btn">
                     <FaCheck /> Выбрать
                   </button>
                 </div>
@@ -138,7 +125,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
             <div className="bullet-list">
               {customBullets.length > 0 ? (
                 customBullets.map(bullet => (
-                  <div key={bullet.id} className="bullet-item">
+                  <div key={bullet.id} className="bullet-item card-glass">
                     <div className="bullet-info">
                       <h3>{bullet.caliber} {bullet.name}</h3>
                       <div className="bullet-details">
@@ -147,19 +134,10 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
                       </div>
                     </div>
                     <div className="bullet-actions">
-                      <button 
-                        onClick={() => {
-                          onSelect(bullet);
-                          onClose();
-                        }}
-                        className="select-btn"
-                      >
+                      <button onClick={() => { onSelect(bullet); onClose(); }} className="btn-glow select-btn">
                         <FaCheck /> Выбрать
                       </button>
-                      <button 
-                        onClick={() => handleDeleteBullet(bullet.id)}
-                        className="delete-btn"
-                      >
+                      <button onClick={() => handleDeleteBullet(bullet.id)} className="btn-glow delete-btn">
                         <FaTrash /> Удалить
                       </button>
                     </div>
@@ -168,10 +146,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
               ) : (
                 <div className="empty-state">
                   <p>Нет пользовательских патронов</p>
-                  <button 
-                    onClick={() => setActiveTab('add')}
-                    className="add-first-btn"
-                  >
+                  <button onClick={() => setActiveTab('add')} className="btn-glow add-first-btn">
                     <FaPlus /> Добавить первый патрон
                   </button>
                 </div>
@@ -187,8 +162,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
                   type="number"
                   step="0.1"
                   value={newBullet.caliber}
-                  onChange={(e) => setNewBullet({...newBullet, caliber: e.target.value})}
-                  placeholder="Например: 7.62"
+                  onChange={(e) => setNewBullet({ ...newBullet, caliber: e.target.value })}
                 />
               </div>
               <div className="form-group">
@@ -196,8 +170,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
                 <input
                   type="text"
                   value={newBullet.name}
-                  onChange={(e) => setNewBullet({...newBullet, name: e.target.value})}
-                  placeholder="Например: FMJ"
+                  onChange={(e) => setNewBullet({ ...newBullet, name: e.target.value })}
                 />
               </div>
               <div className="form-row">
@@ -207,7 +180,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
                     type="number"
                     step="0.1"
                     value={newBullet.weight}
-                    onChange={(e) => setNewBullet({...newBullet, weight: e.target.value})}
+                    onChange={(e) => setNewBullet({ ...newBullet, weight: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -216,22 +189,15 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
                     type="number"
                     step="0.001"
                     value={newBullet.bc}
-                    onChange={(e) => setNewBullet({...newBullet, bc: e.target.value})}
+                    onChange={(e) => setNewBullet({ ...newBullet, bc: e.target.value })}
                   />
                 </div>
               </div>
               <div className="form-actions">
-                <button 
-                  onClick={handleAddBullet}
-                  className="save-btn"
-                  disabled={!newBullet.caliber || !newBullet.name || !newBullet.weight || !newBullet.bc}
-                >
+                <button onClick={handleAddBullet} className="btn-glow save-btn">
                   <FaPlus /> Сохранить патрон
                 </button>
-                <button 
-                  onClick={() => setActiveTab('custom')}
-                  className="cancel-btn"
-                >
+                <button onClick={() => setActiveTab('custom')} className="btn-glow cancel-btn">
                   Отмена
                 </button>
               </div>

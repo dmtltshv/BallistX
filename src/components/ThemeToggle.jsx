@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa';
-import './ThemeToggle.css';
 
 const ThemeToggle = ({ theme, toggleTheme }) => {
   useEffect(() => {
@@ -9,15 +8,12 @@ const ThemeToggle = ({ theme, toggleTheme }) => {
   }, []);
 
   return (
-    <button className="theme-toggle" onClick={toggleTheme}>
+    <button className="btn-glow theme-toggle" onClick={toggleTheme}>
       {theme === 'light' ? (
-        <FaMoon size={18} />
+        <><FaMoon /> Темная тема</>
       ) : (
-        <FaSun size={18} />
+        <><FaSun /> Светлая тема</>
       )}
-      <span className="theme-text">
-        {theme === 'light' ? 'Темная тема' : 'Светлая тема'}
-      </span>
     </button>
   );
 };

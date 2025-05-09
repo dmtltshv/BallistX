@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import './CameraOverlay.css';
 
 export default function CameraOverlay({ onClose, results = [] }) {
   const videoRef = useRef(null);
@@ -8,8 +7,8 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const [tiltAngle, setTiltAngle] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
 
-  const fieldOfView = 60; // угол обзора по вертикали
-  const calibrationOffset = 0; // если захочешь потом подстроить
+  const fieldOfView = 60;
+  const calibrationOffset = 0;
 
   useEffect(() => {
     const askPermission = async () => {
@@ -52,7 +51,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } }
+        video: { facingMode: { ideal: 'environment' } }
       });
 
       if (videoRef.current) {
@@ -96,13 +95,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
 
   return (
     <div className="camera-overlay">
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        className="camera-video"
-      />
+      <video ref={videoRef} autoPlay muted playsInline className="camera-video" />
 
       {streamStarted && (
         <>
@@ -118,7 +111,6 @@ export default function CameraOverlay({ onClose, results = [] }) {
             if (Math.abs(relativeAngle) > fieldOfView / 2) return null;
 
             let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
-
             if (lastTop !== null && Math.abs(topPercent - lastTop) < 7) {
               topPercent = lastTop + 8;
             }
@@ -131,10 +123,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
               <div
                 key={index}
                 className={`marker ${colorClass} ${isTargeted ? 'pulse' : ''}`}
-                style={{
-                  top: `${topPercent}%`,
-                  left: '50%',
-                }}
+                style={{ top: `${topPercent}%`, left: '50%' }}
               >
                 <div>{r.range} м</div>
                 <div>↓ {r.drop.toFixed(1)} см</div>
@@ -143,9 +132,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
             );
           })}
 
-          <div className="tilt-indicator">
-            Угол: {tiltAngle.toFixed(1)}°
-          </div>
+          <div className="tilt-indicator">Угол: {tiltAngle.toFixed(1)}°</div>
 
           {showWarning && (
             <div className="warning-overlay">
@@ -158,11 +145,11 @@ export default function CameraOverlay({ onClose, results = [] }) {
 
       <div className="camera-controls">
         {!streamStarted && (
-          <button className="start-btn" onClick={startCamera}>
+          <button className="btn-glow start-btn" onClick={startCamera}>
             Включить камеру
           </button>
         )}
-        <button className="close-btn" onClick={stopCamera}>
+        <button className="btn-glow close-btn" onClick={stopCamera}>
           Закрыть
         </button>
         {error && <div className="camera-error">{error}</div>}

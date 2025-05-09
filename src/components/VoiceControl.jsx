@@ -70,12 +70,7 @@ const VoiceControl = ({
         return;
       }
 
-      processVoiceCommand(transcript, {
-        bullet: bulletRef.current,
-        inputValues: inputValuesRef.current,
-        conditions: conditionsRef.current,
-        allBullets: allBulletsRef.current
-      });
+      processVoiceCommand(transcript);
     };
 
     recognizer.onerror = (event) => {
@@ -90,11 +85,7 @@ const VoiceControl = ({
       recognizer._isActive = false;
       if (!recognizer._forceStopped) {
         setTimeout(() => {
-          try {
-            recognizer.start();
-          } catch (err) {
-            console.warn('Ошибка перезапуска микрофона:', err.message);
-          }
+          try { recognizer.start(); } catch {}
         }, 300);
       } else {
         setIsListening(false);
@@ -106,142 +97,45 @@ const VoiceControl = ({
       recognizer._forceStopped = true;
       recognizer.stop();
     };
-  }, []);
+  }, [helpActive]);
 
-  const processVoiceCommand = (text, { bullet = null, inputValues = {}, conditions = {}, allBullets = [] } = {}) => {
-    let triggerCalculation = false;
+  const processVoiceCommand = (text) => {
+    let trigger = false;
+    const iv = inputValuesRef.current;
+    const c = conditionsRef.current;
+    const bullets = allBulletsRef.current;
 
     if (text.includes('помощь')) {
       setHelpActive(true);
       setStatus('Доступные голосовые команды:');
       return;
     }
-
-    if (helpActive) {
-      setHelpActive(false);
-    }
-
-    if (text.includes('расчитай') || text.includes('расчет') || text.includes('расчитать')) {
-      triggerCalculation = true;
-    }
-
-    if (text.includes('калибр')) {
-      const match = text.match(/калибр\s(\d+(\.\d+)?)/);
-      if (match) {
-        const caliber = parseFloat(match[1]);
-        const foundBullet = allBullets.find(b => parseFloat(b.caliber) === caliber);
-        if (foundBullet) {
-          setBullet(foundBullet);
-          setStatus(`Выбран калибр: ${caliber} мм`);
-        }
-      }
-    }
-
-    if (text.includes('пуля') || text.includes('патрон')) {
-      const match = text.match(/(?:пуля|патрон)\s([\w\d]+)/i);
-      if (match) {
-        const keyword = match[1].toLowerCase();
-        const foundBullet = allBullets.find(b => b.name.toLowerCase().includes(keyword));
-        if (foundBullet) {
-          setBullet(foundBullet);
-          setStatus(`Выбрана пуля: ${foundBullet.caliber} ${foundBullet.name}`);
-        }
-      }
-    }
-
+    if (helpActive) setHelpActive(false);
+    if (text.includes('расчитай')) trigger = true;
     if (text.includes('скорость')) {
       const match = text.match(/скорость\s(\d+)/);
       if (match) {
-        setInputValues(prev => ({ ...prev, velocity: parseInt(match[1]) }));
+        setInputValues({ ...iv, velocity: parseInt(match[1]) });
         setStatus(`Скорость: ${match[1]} м/с`);
       }
     }
-
     if (text.includes('ветер')) {
       const match = text.match(/ветер\s(\d+)(?:.*?(\d+))?/);
       if (match) {
-        const speed = parseInt(match[1]);
-        const angle = parseInt(match[2]) || 90;
-        setConditions(prev => ({ ...prev, windSpeed: speed, windAngle: angle }));
-        setStatus(`Ветер: ${speed} м/с угол ${angle}°`);
+        setConditions({ ...c, windSpeed: parseInt(match[1]), windAngle: parseInt(match[2]) || 90 });
+        setStatus(`Ветер: ${match[1]} м/с угол ${match[2] || 90}°`);
       }
     }
-
     if (text.includes('пристрелка')) {
       const match = text.match(/пристрелка\s(\d+)/);
       if (match) {
-        setInputValues(prev => ({ ...prev, zeroRange: parseInt(match[1]) }));
+        setInputValues({ ...iv, zeroRange: parseInt(match[1]) });
         setStatus(`Пристрелка: ${match[1]} м`);
       }
     }
-
-    if (text.includes('температура')) {
-      const match = text.match(/температура\s(-?\d+)/);
-      if (match) {
-        setConditions(prev => ({ ...prev, temperature: parseInt(match[1]) }));
-        setStatus(`Температура: ${match[1]}°C`);
-      }
-    }
-
-    if (text.includes('давление')) {
-      const match = text.match(/давление\s(\d+)/);
-      if (match) {
-        setConditions(prev => ({ ...prev, pressure: parseInt(match[1]) }));
-        setStatus(`Давление: ${match[1]} мм рт.ст.`);
-      }
-    }
-
-    if (text.includes('максимальная') || text.includes('дистанция')) {
-      const match = text.match(/(?:максимальная\s)?дистанция\s(\d+)/);
-      if (match) {
-        setInputValues(prev => ({ ...prev, maxRange: parseInt(match[1]) }));
-        setStatus(`Максимальная дистанция: ${match[1]} м`);
-      }
-    }
-
-    if (text.includes('шаг')) {
-      const match = text.match(/шаг\s(\d+)/);
-      if (match) {
-        setInputValues(prev => ({ ...prev, step: parseInt(match[1]) }));
-        setStatus(`Шаг: ${match[1]} м`);
-      }
-    }
-
-    if (text.includes('прицел') || text.includes('высота')) {
-      const match = text.match(/(?:прицел|высота)\s(\d+)/);
-      if (match) {
-        setInputValues(prev => ({ ...prev, scopeHeight: parseInt(match[1]) }));
-        setStatus(`Высота прицела: ${match[1]} мм`);
-      }
-    }
-
-    if (text.includes('сброс')) {
-      setBullet(null);
-      setInputValues({
-        velocity: '',
-        zeroRange: 100,
-        scopeHeight: 40,
-        maxRange: 1000,
-        step: 50,
-      });
-      setConditions({
-        temperature: 15,
-        pressure: 760,
-        humidity: 50,
-        windSpeed: 0,
-        windAngle: 90,
-      });
-      setStatus('Параметры сброшены.');
-      return;
-    }
-
-    if (triggerCalculation) {
-      if (bulletRef.current && bulletRef.current.name && inputValuesRef.current.velocity) {
-        setShouldCalculate(true);
-        setStatus('Рассчитываю траекторию...');
-      } else {
-        setStatus('Пуля или скорость не выбраны. Проверьте данные.');
-      }
+    if (trigger && bulletRef.current && iv.velocity) {
+      setShouldCalculate(true);
+      setStatus('Рассчитываю траекторию...');
     }
   };
 
@@ -258,17 +152,17 @@ const VoiceControl = ({
   };
 
   return (
-    <div className="voice-control">
+    <div className="voice-control card-glass">
       <button
         onClick={toggleListening}
         disabled={!browserSupport}
-        className={`voice-button ${isListening ? 'listening' : ''}`}
+        className={`btn-glow voice-button ${isListening ? 'listening' : ''}`}
       >
         {isListening ? (<><FaMicrophoneSlash /> Остановить</>) : (<><FaMicrophone /> Голосовое управление</>)}
         {!browserSupport && <FaExclamationTriangle className="warning-icon" />}
       </button>
 
-      <div className={`voice-status ${status.includes('Ошибка') ? 'error' : ''}`} style={{ whiteSpace: 'pre-line' }}>
+      <div className={`voice-status ${status.includes('Ошибка') ? 'error' : ''}`}>
         {status}
       </div>
 
@@ -281,11 +175,6 @@ const VoiceControl = ({
             <li>«Скорость 820 м/с»</li>
             <li>«Ветер 5 90»</li>
             <li>«Пристрелка 100 метров»</li>
-            <li>«Температура 20 градусов»</li>
-            <li>«Давление 760 миллиметров»</li>
-            <li>«Максимальная дистанция 800»</li>
-            <li>«Шаг 50»</li>
-            <li>«Высота прицела 40»</li>
             <li>«Рассчитай траекторию»</li>
             <li>«Сброс»</li>
             <li>«Стоп»</li>

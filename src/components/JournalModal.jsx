@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaTimes, FaTrash, FaFileExport, FaFileCsv, FaFileImage } from 'react-icons/fa';
 import { toJpeg } from 'html-to-image';
-import './JournalModal.css';
 
 const JournalModal = ({ 
   show, 
@@ -83,15 +82,11 @@ const JournalModal = ({
     if (!window.confirm('Удалить эту сессию и все связанные заметки?')) return;
 
     try {
-      // Удаляем заметки сессии
       const notesToDelete = notes.filter(n => n.sessionId === id);
       for (const note of notesToDelete) {
         await offlineManager.deleteNote(note.id);
       }
-
-      // Удаляем саму сессию
       await offlineManager.deleteSession(id);
-      
       setSessions(sessions.filter(s => s.id !== id));
       if (selectedSession?.id === id) {
         setSelectedSession(null);
@@ -103,109 +98,20 @@ const JournalModal = ({
     }
   };
 
-  const exportToJPG = async (session) => {
-    try {
-      // Создаем временный элемент для рендеринга
-      const node = document.createElement('div');
-      node.style.background = 'white';
-      node.style.padding = '20px';
-      node.style.color = 'black';
-      node.style.fontFamily = 'Arial, sans-serif';
-      
-      node.innerHTML = `
-        <h2 style="margin-top: 0;">Баллистический расчет</h2>
-        <div style="margin-bottom: 15px;">
-          <div><strong>Дата:</strong> ${new Date(session.date).toLocaleString()}</div>
-          <div><strong>Патрон:</strong> ${session.bulletName}</div>
-          <div><strong>Скорость:</strong> ${session.velocity} м/с</div>
-        </div>
-        
-        <h3>Погодные условия</h3>
-        <div style="margin-bottom: 15px;">
-          <div>Температура: ${session.conditions.temperature}°C</div>
-          <div>Давление: ${session.conditions.pressure} мм рт.ст.</div>
-          <div>Ветер: ${session.conditions.windSpeed} м/с, ${session.conditions.windAngle}°</div>
-        </div>
-        
-        <h3>Результаты</h3>
-        <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="background: #f0f0f0;">
-              <th>Дистанция (м)</th>
-              <th>Скорость (м/с)</th>
-              <th>Падение (см)</th>
-              <th>Поправка (MOA)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${session.results.filter((_, i) => i % 2 === 0).map(r => `
-              <tr>
-                <td>${r.range}</td>
-                <td>${r.velocity.toFixed(1)}</td>
-                <td>${r.drop.toFixed(1)}</td>
-                <td>${r.correction.moa.toFixed(1)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-
-      document.body.appendChild(node);
-      
-      const dataUrl = await toJpeg(node, {
-        quality: 0.95,
-        backgroundColor: 'white'
-      });
-      
-      const link = document.createElement('a');
-      link.download = `ballistic_${session.bulletName.replace(/[^\w]/g, '_')}.jpg`;
-      link.href = dataUrl;
-      link.click();
-      
-      document.body.removeChild(node);
-    } catch (error) {
-      console.error('Error exporting to JPG:', error);
-      alert('Ошибка при экспорте в JPG');
-    }
-  };
-
   const exportToCSV = (session) => {
-    const csvRows = [];
-    
-    // Заголовок
-    csvRows.push('Баллистический расчет');
-    csvRows.push(`Патрон: ${session.bulletName}`);
-    csvRows.push(`Дата: ${new Date(session.date).toLocaleString()}`);
-    csvRows.push('');
-    
-    // Погодные условия
-    csvRows.push('Погодные условия');
-    csvRows.push(`Температура: ${session.conditions.temperature}°C`);
-    csvRows.push(`Давление: ${session.conditions.pressure} мм рт.ст.`);
-    csvRows.push(`Ветер: ${session.conditions.windSpeed} м/с, ${session.conditions.windAngle}°`);
-    csvRows.push('');
-    
-    // Данные
-    csvRows.push('Дистанция (м),Скорость (м/с),Падение (см),Поправка (MOA),Ветер (MOA)');
-    session.results.forEach(r => {
-      csvRows.push([
-        r.range,
-        r.velocity.toFixed(1),
-        r.drop.toFixed(1),
-        r.correction.moa.toFixed(1),
-        r.windage.moa.toFixed(1)
-      ].join(','));
-    });
-    
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvRows = [
+      'Дистанция (м),Скорость (м/с),Падение (см),Поправка (MOA),Ветер (MOA)',
+      ...session.results.map(r =>
+        [r.range, r.velocity.toFixed(1), r.drop.toFixed(1), r.correction.moa.toFixed(1), r.windage.moa.toFixed(1)].join(',')
+      )
+    ];
+
+    const blob = new Blob(["﻿" + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    
     const link = document.createElement('a');
     link.href = url;
-    link.download = `ballistic_${session.bulletName.replace(/[^\w]/g, '_')}.csv`;
+    link.download = 'ballistics.csv';
     link.click();
-    
     URL.revokeObjectURL(url);
   };
 
@@ -213,160 +119,76 @@ const JournalModal = ({
 
   return (
     <div className="modal-overlay">
-      <div className="journal-modal">
+      <div className="journal-modal card-glass">
         <div className="modal-header">
-          <h2>Журнал расчетов</h2>
-          <button onClick={onClose} className="close-btn">
+          <h2 className="section-title" data-icon="🕒">Журнал расчетов</h2>
+          <button onClick={onClose} className="btn-glow">
             <FaTimes />
           </button>
         </div>
 
         <div className="modal-content">
           <div className="sessions-column">
-            <h3>Сохраненные сессии</h3>
             {isLoading && <div className="loading">Загрузка...</div>}
-            
             {sessions.length > 0 ? (
-              <div className="sessions-list">
-                {sessions.map(session => (
-                  <div 
-                    key={session.id} 
-                    className={`session-item ${selectedSession?.id === session.id ? 'active' : ''}`}
-                    onClick={() => setSelectedSession(session)}
-                  >
-                    <div className="session-info">
-                      <h4>{new Date(session.date).toLocaleString()}</h4>
-                      <p>{session.bulletName}</p>
-                      <p>{session.velocity} м/с, {session.zeroRange}м</p>
-                    </div>
-                    <div className="session-actions">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          exportToJPG(session);
-                        }}
-                        className="export-btn"
-                        title="Экспорт в JPG"
-                      >
-                        <FaFileImage />
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          exportToCSV(session);
-                        }}
-                        className="export-btn"
-                        title="Экспорт в CSV"
-                      >
-                        <FaFileCsv />
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteSession(session.id);
-                        }}
-                        className="delete-btn"
-                        title="Удалить"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
+              sessions.map(session => (
+                <div 
+                  key={session.id} 
+                  className={`session-item card-glass ${selectedSession?.id === session.id ? 'active' : ''}`}
+                  onClick={() => setSelectedSession(session)}
+                >
+                  <h4>{new Date(session.date).toLocaleString()}</h4>
+                  <p>{session.bulletName}</p>
+                  <p>{session.velocity} м/с</p>
+                  <div className="session-actions">
+                    <button className="btn-glow export-btn" onClick={(e) => { e.stopPropagation(); exportToCSV(session); }}>
+                      <FaFileCsv />
+                    </button>
+                    <button className="btn-glow" onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }}>
+                      <FaTrash />
+                    </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))
             ) : (
-              <div className="empty-state">
-                <p>Нет сохраненных сессий</p>
-              </div>
+              <div className="empty-state">Нет сохраненных сессий</div>
             )}
           </div>
 
           <div className="details-column">
-            {selectedSession ? (
-              <>
-                <div className="session-details">
-                  <h3>Детали сессии</h3>
-                  <div className="detail-row">
-                    <span>Патрон:</span>
-                    <span>{selectedSession.bulletName}</span>
+            {selectedSession && (
+              <div className="session-details card-glass">
+                <h3 className="section-title" data-icon="📌">Детали сессии</h3>
+                <p><strong>Пуля:</strong> {selectedSession.bulletName}</p>
+                <p><strong>Скорость:</strong> {selectedSession.velocity} м/с</p>
+                <p><strong>Пристрелка:</strong> {selectedSession.zeroRange} м</p>
+                <p><strong>Высота прицела:</strong> {selectedSession.scopeHeight} мм</p>
+                <button className="btn-glow load-btn" onClick={() => { onLoadSession(selectedSession); onClose(); }}>
+                  Загрузить
+                </button>
+              </div>
+            )}
+
+            {selectedSession && (
+              <div className="notes-section">
+                <h3 className="section-title" data-icon="📝">Заметки</h3>
+                {notes.map(note => (
+                  <div key={note.id} className="note-item card-glass">
+                    <div className="note-date">🗒️ {new Date(note.date).toLocaleString()}</div>
+                    <div className="note-text">{note.text}</div>
                   </div>
-                  <div className="detail-row">
-                    <span>Скорость:</span>
-                    <span>{selectedSession.velocity} м/с</span>
-                  </div>
-                  <div className="detail-row">
-                    <span>Пристрелка:</span>
-                    <span>{selectedSession.zeroRange} м</span>
-                  </div>
-                  <div className="detail-row">
-                    <span>Высота прицела:</span>
-                    <span>{selectedSession.scopeHeight} мм</span>
-                  </div>
-                  
-                  <h4>Погодные условия</h4>
-                  <div className="detail-row">
-                    <span>Температура:</span>
-                    <span>{selectedSession.conditions.temperature}°C</span>
-                  </div>
-                  <div className="detail-row">
-                    <span>Давление:</span>
-                    <span>{selectedSession.conditions.pressure} мм рт.ст.</span>
-                  </div>
-                  <div className="detail-row">
-                    <span>Ветер:</span>
-                    <span>{selectedSession.conditions.windSpeed} м/с, {selectedSession.conditions.windAngle}°</span>
-                  </div>
-                  
-                  <button 
-                    onClick={() => {
-                      onLoadSession(selectedSession);
-                      onClose();
-                    }}
-                    className="load-btn"
-                  >
-                    Загрузить эту сессию
+                ))}
+                <div className="add-note">
+                  <textarea
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    rows="3"
+                    placeholder="Добавить новую заметку..."
+                  />
+                  <button className="btn-glow add-btn" onClick={handleAddNote} disabled={!newNote.trim()}>
+                    Добавить заметку
                   </button>
                 </div>
-
-                <div className="notes-section">
-                  <h3>Заметки</h3>
-                  {notes.length > 0 ? (
-                    <div className="notes-list">
-                      {notes.map(note => (
-                        <div key={note.id} className="note-item">
-                          <div className="note-date">
-                            {new Date(note.date).toLocaleString()}
-                          </div>
-                          <div className="note-text">{note.text}</div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="empty-notes">
-                      <p>Нет заметок для этой сессии</p>
-                    </div>
-                  )}
-                  
-                  <div className="add-note">
-                    <textarea
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      placeholder="Добавить новую заметку..."
-                      rows="3"
-                    />
-                    <button 
-                      onClick={handleAddNote}
-                      disabled={!newNote.trim()}
-                      className="add-btn"
-                    >
-                      Добавить заметку
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="select-session-prompt">
-                <p>Выберите сессию для просмотра деталей</p>
               </div>
             )}
           </div>

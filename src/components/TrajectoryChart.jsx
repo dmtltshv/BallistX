@@ -22,45 +22,55 @@ const TrajectoryChart = ({ results }) => {
           {
             label: 'Падение пули (см)',
             data: results.map(r => r.drop),
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            borderColor: 'rgba(56, 175, 136, 1)',
+            backgroundColor: 'rgba(56, 175, 136, 0.2)',
             borderWidth: 2,
-            tension: 0.1,
+            tension: 0.3,
             yAxisID: 'y',
           },
           {
-            label: 'Ветер (см)',
+            label: 'Отклонение по ветру (см)',
             data: results.map(r => r.windage.cm),
-            borderColor: 'rgb(255, 99, 132)',
-            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+            borderColor: 'rgba(144, 113, 99, 1)',
+            backgroundColor: 'rgba(144, 113, 99, 0.2)',
             borderWidth: 2,
-            tension: 0.1,
+            tension: 0.3,
             yAxisID: 'y',
           },
         ],
       },
       options: {
         responsive: true,
-        interaction: {
-          mode: 'index',
-          intersect: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text')
+            }
+          }
         },
         scales: {
           x: {
             title: {
               display: true,
               text: 'Дистанция (м)',
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text')
             },
+            ticks: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text')
+            }
           },
           y: {
             title: {
               display: true,
               text: 'Отклонение (см)',
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text')
             },
-            beginAtZero: false,
-          },
-        },
-      },
+            ticks: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text')
+            }
+          }
+        }
+      }
     });
 
     return () => {
@@ -70,7 +80,12 @@ const TrajectoryChart = ({ results }) => {
     };
   }, [results]);
 
-  return <canvas ref={chartRef} />;
+  return (
+    <div className="trajectory-chart card-glass">
+      <h3 className="section-title" data-icon="📈">График траектории</h3>
+      <canvas ref={chartRef} />
+    </div>
+  );
 };
 
 export default TrajectoryChart;

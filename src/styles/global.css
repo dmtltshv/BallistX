@@ -1,0 +1,349 @@
+/* === Global Theme Variables === */
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f4f4f4;
+  --text: #222222;
+  --accent: #379683;
+  --accent-hover: #2e7b6b;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-blur: blur(8px);
+  --highlight: #907163;
+  --chart-grid: rgba(0, 0, 0, 0.1);
+  --chart-text: #222222;
+  --chart-line-1: #379683;
+  --chart-line-2: #907163;
+}
+
+[data-theme='dark'] {
+  --bg: #1f1f1f;
+  --bg-secondary: #2b2b2b;
+  --text: #edf5e1;
+  --accent: #5CDB95;
+  --accent-hover: #8EE4AF;
+  --card-shadow: rgba(0, 0, 0, 0.5);
+  --glass-bg: rgba(44, 44, 44, 0.3);
+  --highlight: #8EE4AF;
+  --chart-grid: rgba(255, 255, 255, 0.1);
+  --chart-text: #edf5e1;
+  --chart-line-1: #8EE4AF;
+  --chart-line-2: #907163;
+}
+
+/* === Stylish Glow Buttons === */
+.btn-glow {
+  background-color: var(--accent);
+  color: white;
+  padding: 0.6em 1.2em;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 0 10px var(--accent);
+  transition: var(--transition);
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 20px var(--accent-hover), 0 0 10px var(--accent-hover) inset;
+  background-color: var(--accent-hover);
+}
+
+/* === Frosted Glass Card === */
+.card-glass {
+  backdrop-filter: var(--glass-blur);
+  background-color: var(--glass-bg);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 20px var(--card-shadow);
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* === Fancy Section Titles === */
+.section-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--highlight);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid var(--accent);
+  padding-left: 0.75rem;
+}
+
+.section-title::before {
+  content: attr(data-icon) ' ';
+  font-weight: normal;
+  margin-right: 0.4rem;
+}
+
+/* === Animated Marker Pulse === */
+.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(56, 175, 136, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(56, 175, 136, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(56, 175, 136, 0); }
+}
+
+/* === Gradient Background Element === */
+.gradient-box {
+  background: linear-gradient(135deg, var(--accent), var(--highlight));
+  color: white;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Keep existing styles below */
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', sans-serif;
+  transition: var(--transition);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3 {
+  color: var(--accent);
+  margin-bottom: 0.5em;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; }
+
+/* === Buttons === */
+button,
+.btn {
+  background-color: var(--accent);
+  color: #fff;
+  padding: 0.6em 1.2em;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 1rem;
+}
+
+button:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+button:disabled,
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn + .btn {
+  margin-left: 0.75rem;
+}
+
+/* === Forms & Inputs === */
+input, select, textarea {
+  background-color: var(--bg-secondary);
+  color: var(--text);
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  padding: 0.5em 0.75em;
+  transition: var(--transition);
+  font-size: 1rem;
+  width: 100%;
+  margin-top: 0.25rem;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-hover);
+}
+
+label {
+  display: block;
+  margin-bottom: 0.25em;
+  font-weight: 500;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+}
+
+.form-row .form-group {
+  flex: 1 1 220px;
+  min-width: 200px;
+  margin: 0;
+}
+
+/* === Cards === */
+.card {
+  background-color: var(--bg-secondary);
+  box-shadow: 0 2px 6px var(--card-shadow);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* === Results Table === */
+.results-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.results-table th, .results-table td {
+  padding: 0.6rem 0.8rem;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+}
+
+.results-table thead tr {
+  background-color: var(--accent);
+  color: white;
+}
+
+.results-table tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* === Modals === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal, .journal-modal, .bullet-library-modal {
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 540px;
+  background: var(--bg);
+  border-radius: var(--border-radius);
+}
+
+.bullet-library-modal .bullet-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  background: var(--bg-secondary);
+  margin-bottom: 1rem;
+}
+
+.bullet-library-modal .bullet-info h3 {
+  margin: 0;
+}
+
+/* === Layout === */
+.calculator-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.calculator-content {
+  display: flex;
+  gap: 2rem;
+  flex-direction: column;
+}
+
+.app-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .calculator-content {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .input-section, .output-section {
+    flex: 1;
+  }
+}
+
+/* === Utilities === */
+.hidden { display: none; }
+.center { text-align: center; }
+.text-sm { font-size: 0.85rem; color: gray; }
+
+/* === Voice Control Section Fix === */
+.voice-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  max-width: 400px;
+}
+
+.voice-status {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.voice-help {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+/* === Camera Button Full Width Fix === */
+.camera-overlay-trigger {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 1rem;
+  align-self: flex-start;
+}

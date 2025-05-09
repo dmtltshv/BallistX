@@ -1,10 +1,9 @@
-import './ResultsTable.css';
-
 const ResultsTable = ({ results, isFieldMode }) => {
   if (results.length === 0) return null;
 
   return (
-    <div className={`results-table ${isFieldMode ? 'field-mode' : ''}`}>
+    <div className={`results-table card-glass ${isFieldMode ? 'field-mode' : ''}`}>
+      <h3 className="section-title" data-icon="📊">Результаты расчета</h3>
       <div className="table-container">
         <table>
           <thead>
@@ -26,18 +25,14 @@ const ResultsTable = ({ results, isFieldMode }) => {
                 {!isFieldMode && <td>{Math.round(result.energy)}</td>}
                 <td>{result.drop.toFixed(1)}</td>
                 <td>
-                  {isFieldMode ? (
-                    `${result.correction.moa.toFixed(1)}MOA`
-                  ) : (
-                    `${result.correction.moa.toFixed(1)}MOA / ${result.correction.mil.toFixed(1)}тыс.`
-                  )}
+                  {isFieldMode
+                    ? `${result.correction.moa.toFixed(1)} MOA`
+                    : `${result.correction.moa.toFixed(1)} MOA / ${result.correction.mil.toFixed(1)} тыс.`}
                 </td>
                 <td>
-                  {isFieldMode ? (
-                    `${result.windage.moa.toFixed(1)}MOA`
-                  ) : (
-                    `${result.windage.moa.toFixed(1)}MOA / ${result.windage.mil.toFixed(1)}тыс.`
-                  )}
+                  {isFieldMode
+                    ? `${result.windage.moa.toFixed(1)} MOA`
+                    : `${result.windage.moa.toFixed(1)} MOA / ${result.windage.mil.toFixed(1)} тыс.`}
                 </td>
                 {!isFieldMode && <td>{result.time.toFixed(3)}</td>}
               </tr>
