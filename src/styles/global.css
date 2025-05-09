@@ -508,6 +508,7 @@ label {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
   transition: top 0.1s ease-out;
   white-space: nowrap;
+  z-index: 5; /* выше видео */
 }
 
 .green-marker {
