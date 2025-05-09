@@ -13,6 +13,18 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
   });
 
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose(); // вызываем функцию закрытия окна
+      }
+    };
+  
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+  
+
+  useEffect(() => {
     if (!show) return;
 
     const loadCustomBullets = async () => {
@@ -90,7 +102,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
       <div className="bullet-library-modal card-glass">
         <div className="modal-header">
           <h2 className="section-title" data-icon="🧱">Библиотека патронов</h2>
-          <button onClick={onClose} className="btn-glow">
+          <button onClick={onClose} className="btn-glow close-button">
             <FaTimes />
           </button>
         </div>

@@ -175,7 +175,7 @@ const CorrectionTools = ({ results, originalResults, setResults }) => {
         </div>
       </div>
 
-      <button onClick={resetCorrections} className="btn-glow">Сбросить коррекции</button>
+      <button onClick={resetCorrections} className="btn-glow btn-restart delete-btn">Сбросить коррекции</button>
     </div>
   );
 };

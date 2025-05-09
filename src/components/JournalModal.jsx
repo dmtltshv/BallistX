@@ -16,6 +16,17 @@ const JournalModal = ({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose(); // вызываем функцию закрытия окна
+      }
+    };
+  
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     if (!show) return;
 
     const loadSessions = async () => {
@@ -122,7 +133,7 @@ const JournalModal = ({
       <div className="journal-modal card-glass">
         <div className="modal-header">
           <h2 className="section-title" data-icon="🕒">Журнал расчетов</h2>
-          <button onClick={onClose} className="btn-glow">
+          <button onClick={onClose} className="btn-glow close-button">
             <FaTimes />
           </button>
         </div>
@@ -144,7 +155,7 @@ const JournalModal = ({
                     <button className="btn-glow export-btn" onClick={(e) => { e.stopPropagation(); exportToCSV(session); }}>
                       <FaFileCsv />
                     </button>
-                    <button className="btn-glow" onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }}>
+                    <button className="btn-glow delete-btn" onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }}>
                       <FaTrash />
                     </button>
                   </div>

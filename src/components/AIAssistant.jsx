@@ -86,9 +86,9 @@ const AIAssistant = ({ results, bullet, conditions, isFieldMode }) => {
   };
 
   return (
-    <div className={`card ai-assistant ${isFieldMode ? 'field-mode' : ''}`}>
+    <div className={`ai-assistant card-glass ${isFieldMode ? 'field-mode' : ''}`}>
       <div className="form-row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3><FaRobot /> {isFieldMode ? 'Полевые рекомендации' : 'Баллистический анализ'}</h3>
+        <h3 className="section-title" data-icon="🤖"> {isFieldMode ? 'Рекомендации' : 'Баллистический анализ'}</h3>
         <button className="btn" onClick={generateRecommendations} disabled={isLoading || !bullet}>
           {isLoading ? (<><FaSyncAlt className="spin" /> Анализ...</>) : 'Получить рекомендации'}
         </button>

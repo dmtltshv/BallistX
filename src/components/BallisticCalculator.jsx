@@ -14,6 +14,13 @@ import { FaSun, FaMoon } from 'react-icons/fa';
 import { calculateTrajectory } from '../services/ballisticCalculations';
 import ballisticData from '../data/ballisticData';
 import OfflineManager from '../services/OfflineManager';
+import { ReactComponent as BallistXLogo } from '../assets/ballistx_logo_icon.svg';
+
+
+<a href="/" className="logo-link">
+  <BallistXLogo className="logo-image" />
+</a>
+
 
 const BallisticCalculator = () => {
   const [bullet, setBullet] = useState(null);
@@ -153,9 +160,15 @@ const BallisticCalculator = () => {
   };
  
   return (
-    <div className={`calculator-container \${isFieldMode ? 'field-mode' : ''}`}>
+    <div className={`calculator-container \${isFieldMode ? 'field-mode' : ''} main-layout \${results?.length > 0 ? 'has-results' : 'no-results'}`}>
       <div className="app-header">
-        <h1 className="section-title" data-icon="🎯">BallistX</h1>
+      <h1 className="visually-hidden">BallistX — баллистический калькулятор</h1>
+      <div className="logo-wrapper">
+        <a href="/">
+          <BallistXLogo className="logo-icon" />
+        </a>
+      </div>
+
         <div className="app-controls">
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
           <button className={`btn-glow mode-switch \${isFieldMode ? 'field' : 'full'}`} onClick={() => setIsFieldMode(!isFieldMode)}>
@@ -205,30 +218,29 @@ const BallisticCalculator = () => {
             </>
           )}
         </div>
-
-        <div className="output-section">
-          {results.length > 0 && (
+        {results.length > 0 && (
             <>
+        <div className="output-section">
               {!isFieldMode && <TrajectoryChart key={theme} results={results} />}
               <ResultsTable results={results} isFieldMode={isFieldMode} />
-            </>
-          )}
-          <AIAssistant
+              <AIAssistant
             results={results}
             bullet={bullet}
             conditions={conditions}
             isFieldMode={isFieldMode}
           />
+          <div className="camera-overlay-trigger">
+          <button className="btn-glow" onClick={() => setShowCamera(true)}>Включить камеру</button>
         </div>
+          {showCamera && (
+          <CameraOverlay results={results} onClose={() => setShowCamera(false)} />
+        )}
+        </div>
+         </>
+          )}
       </div>
 
-      <div className="camera-overlay-trigger">
-        <button className="btn-glow" onClick={() => setShowCamera(true)}>Включить камеру</button>
-      </div>
-
-      {showCamera && (
-        <CameraOverlay results={results} onClose={() => setShowCamera(false)} />
-      )}
+      
 
       {showLibrary && (
         <div className="modal-overlay">

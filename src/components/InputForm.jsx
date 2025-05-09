@@ -85,11 +85,6 @@ const InputForm = ({
               </button>
             )}
           </div>
-          {bullet && (
-            <div className="selected-bullet-info">
-              Выбрано: {bullet.caliber} {bullet.name} (BC: {bullet.bc})
-            </div>
-          )}
         </div>
 
         <div className="form-row">
