@@ -48,7 +48,6 @@ const BallisticCalculator = () => {
   const handleAddCustomBullet = (bullet) => {
     setCustomBullets(prev => [...prev, bullet]);
   };
-  
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);

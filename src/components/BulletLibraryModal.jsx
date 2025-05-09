@@ -54,9 +54,14 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
       mass: parseFloat(newBullet.weight) / 1000,
       custom: true
     };
-
     try {
       await offlineManager.addBullet(bullet);
+  
+      // 🔧 ВАЖНО: добавляем в глобальное состояние
+      if (onAddCustomBullet) {
+        onAddCustomBullet(bullet);
+      }
+  
       setCustomBullets(prev => [...prev, bullet]);
       setNewBullet({ caliber: '', name: '', weight: '', bc: '' });
       setActiveTab('custom');
