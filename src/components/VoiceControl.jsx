@@ -152,7 +152,7 @@ const VoiceControl = ({
   };
 
   return (
-    <div className="voice-control card-glass">
+    <div className="voice-control card-glass full-width">
       <button
         onClick={toggleListening}
         disabled={!browserSupport}

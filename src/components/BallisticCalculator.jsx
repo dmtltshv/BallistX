@@ -142,9 +142,12 @@ const BallisticCalculator = () => {
   };
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('ballistic-theme', newTheme);
   };
-
+ 
   return (
     <div className={`calculator-container \${isFieldMode ? 'field-mode' : ''}`}>
       <div className="app-header">
@@ -202,7 +205,7 @@ const BallisticCalculator = () => {
         <div className="output-section">
           {results.length > 0 && (
             <>
-              {!isFieldMode && <TrajectoryChart results={results} />}
+              {!isFieldMode && <TrajectoryChart key={theme} results={results} />}
               <ResultsTable results={results} isFieldMode={isFieldMode} />
             </>
           )}

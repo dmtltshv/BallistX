@@ -37,6 +37,10 @@
   background-color: var(--accent);
   color: white;
   padding: 0.6em 1.2em;
+  gap: 0.5rem; /* расстояние между кнопками */
+  margin-bottom: 1rem; /* отступ от заголовка */
+  flex-wrap: wrap;
+
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -50,6 +54,10 @@
   background-color: var(--accent-hover);
 }
 
+.library-btn {
+  margin-top: 1rem; /* или 8px, чтобы отделить от инпута */
+}
+
 /* === Frosted Glass Card === */
 .card-glass {
   backdrop-filter: var(--glass-blur);
@@ -58,6 +66,7 @@
   box-shadow: 0 4px 20px var(--card-shadow);
   padding: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 1.5rem;
 }
 
 /* === Fancy Section Titles === */
@@ -324,7 +333,6 @@ label {
   flex-direction: column;
   gap: 0.75rem;
   margin-top: 1.5rem;
-  max-width: 400px;
 }
 
 .voice-status {
@@ -346,4 +354,104 @@ label {
   max-width: 400px;
   margin-top: 1rem;
   align-self: flex-start;
+}
+
+/* === Mobile Responsiveness === */
+@media (max-width: 768px) {
+  .calculator-content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .app-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .input-section, .output-section {
+    width: 100%;
+  }
+
+  .voice-control,
+  .weather-section,
+  .correction-tools {
+    max-width: 100%;
+  }
+
+  .camera-overlay-trigger {
+    max-width: 100%;
+    width: 100%;
+    margin: 1rem 0;
+  }
+
+  .modal, .bullet-library-modal, .journal-modal {
+    max-width: 95vw;
+    padding: 1rem;
+  }
+
+  .results-table table {
+    font-size: 0.85rem;
+  }
+
+  .results-table th, .results-table td {
+    padding: 0.5rem;
+  }
+
+  .gradient-box {
+    font-size: 0.9rem;
+  }
+
+  h1, h2 {
+    font-size: 1.4rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+}
+
+.camera-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: black;
+  z-index: 1000;
+}
+
+.camera-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.crosshair,
+.marker,
+.tilt-indicator,
+.warning-overlay,
+.camera-controls {
+  position: absolute;
+  z-index: 2;
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 0.5rem; /* расстояние между кнопками */
+  margin-bottom: 1rem; /* отступ от заголовка */
+  flex-wrap: wrap;
 }
