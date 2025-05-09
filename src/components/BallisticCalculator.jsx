@@ -45,6 +45,11 @@ const BallisticCalculator = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [shouldCalculate, setShouldCalculate] = useState(false);
 
+  const handleAddCustomBullet = (bullet) => {
+    setCustomBullets(prev => [...prev, bullet]);
+  };
+  
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -234,6 +239,7 @@ const BallisticCalculator = () => {
             bullets={ballisticData}
             onSelect={setBullet}
             offlineManager={offlineManager}
+            onAddCustomBullet={handleAddCustomBullet}
           />
         </div>
       )}

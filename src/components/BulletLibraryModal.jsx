@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { FaTimes, FaPlus, FaTrash, FaCheck } from 'react-icons/fa';
 
-const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }) => {
+const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, onAddCustomBullet }) => {
   const [customBullets, setCustomBullets] = useState([]);
   const [activeTab, setActiveTab] = useState('library');
   const [newBullet, setNewBullet] = useState({
