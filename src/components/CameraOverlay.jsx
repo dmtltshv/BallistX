@@ -9,12 +9,20 @@ export default function CameraOverlay({ onClose, results = [] }) {
 
   const fieldOfView = 60;
   const calibrationOffset = 0;
+  const MIN_DISTANCE = 6;
 
-  const uniqueResults = results.filter(
-    (r, index, self) => index === self.findIndex(t => t.range === r.range)
-  );
-  
+  const calculateMarkerAngle = (drop, range) => {
+    if (!range) return 0;
+    return Math.atan2(drop / 100, range) * (180 / Math.PI);
+  };
 
+  const getMarkerColor = (range) => {
+    if (range <= 300) return 'green-marker';
+    if (range <= 600) return 'yellow-marker';
+    return 'red-marker';
+  };
+
+  // Обработка ориентации
   useEffect(() => {
     const askPermission = async () => {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -39,18 +47,13 @@ export default function CameraOverlay({ onClose, results = [] }) {
     };
 
     askPermission();
-
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation, true);
     };
   }, []);
 
   useEffect(() => {
-    if (Math.abs(tiltAngle) > 80) {
-      setShowWarning(true);
-    } else {
-      setShowWarning(false);
-    }
+    setShowWarning(Math.abs(tiltAngle) > 80);
   }, [tiltAngle]);
 
   const startCamera = async () => {
@@ -85,18 +88,23 @@ export default function CameraOverlay({ onClose, results = [] }) {
     onClose();
   };
 
-  const getMarkerColor = (range) => {
-    if (range <= 300) return 'green-marker';
-    if (range <= 600) return 'yellow-marker';
-    return 'red-marker';
-  };
+  // Подготовка маркеров
+  const positionedMarkers = [];
+  results.forEach((r) => {
+    const markerAngle = calculateMarkerAngle(r.drop, r.range);
+    const relativeAngle = markerAngle - tiltAngle;
+    if (Math.abs(relativeAngle) > fieldOfView / 2) return;
 
-  const calculateMarkerAngle = (drop, range) => {
-    if (!range) return 0;
-    return Math.atan2(drop / 100, range) * (180 / Math.PI);
-  };
+    let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
+    topPercent = Math.max(5, Math.min(95, topPercent));
 
-  let lastTop = null;
+    while (positionedMarkers.some(m => Math.abs(m.top - topPercent) < MIN_DISTANCE)) {
+      topPercent += MIN_DISTANCE;
+      if (topPercent > 95) break;
+    }
+
+    positionedMarkers.push({ ...r, top: topPercent });
+  });
 
   return (
     <div className="camera-overlay">
@@ -109,24 +117,19 @@ export default function CameraOverlay({ onClose, results = [] }) {
             <div className="crosshair-line vertical" />
           </div>
 
-          {results.length > 0 && results.map((r, index) => {
-            const markerAngle = calculateMarkerAngle(r.drop, r.range);
-            const relativeAngle = markerAngle - tiltAngle;
-
-            if (Math.abs(relativeAngle) > fieldOfView / 2) return null;
-
-            // Пропорция по вертикали, где 0° — центр экрана
-            let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
-            topPercent = Math.max(0, Math.min(100, topPercent)); // Clamp
-
+          {positionedMarkers.map((r, index) => {
+            const isTargeted = Math.abs(calculateMarkerAngle(r.drop, r.range) - tiltAngle) < 2;
             const colorClass = getMarkerColor(r.range);
-            const isTargeted = Math.abs(relativeAngle) < 2;
 
             return (
               <div
                 key={index}
                 className={`marker ${colorClass} ${isTargeted ? 'pulse' : ''}`}
-                style={{ top: `${topPercent}%`, left: '50%', transform: 'translate(-50%, -50%)' }}
+                style={{
+                  top: `${r.top}%`,
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)'
+                }}
               >
                 <div>{r.range} м</div>
                 <div>↓ {r.drop.toFixed(1)} см</div>

@@ -454,6 +454,22 @@ label {
   z-index: 2;
 }
 
+.camera-controls {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 4;
+}
+
+.close-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(0,255,0,0.1);
+  border: 1px solid #00ffcc;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
 .crosshair {
   position: absolute;
   top: 50%;
@@ -461,10 +477,7 @@ label {
   width: 30px;
   height: 30px;
   transform: translate(-50%, -50%);
-  border-left: 2px solid rgba(255,255,255,0.8);
-  border-top: 2px solid rgba(255,255,255,0.8);
-  border-right: 2px solid rgba(255,255,255,0.8);
-  border-bottom: 2px solid rgba(255,255,255,0.8);
+  border: 2px solid rgba(255,255,255,0.8);
   z-index: 3;
 }
 
@@ -498,11 +511,7 @@ label {
   pointer-events: none;
   white-space: nowrap;
   font-size: 0.9rem;
-  transition: transform 0.2s ease;
-  border: none;
-  box-shadow: none;
-
-  transition: top 0.2s ease-out;
+  transition: top 0.15s ease-out;
 }
 
 .green-marker { border: 2px solid lime; }
