@@ -11,9 +11,6 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const calibrationOffset = 0;
   const MIN_DISTANCE = 6;
 
-  const tolerance = Math.max(0.3, 0.005 * r.range); // гибкий порог
-  const isTargeted = Math.abs(relativeAngle) < tolerance;
-
 
   useEffect(() => {
     const handleOrientation = (event) => {
