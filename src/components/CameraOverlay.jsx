@@ -9,39 +9,25 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const [showWarning, setShowWarning] = useState(false);
   const [showAllMarkers, setShowAllMarkers] = useState(false);
 
-  const smoothedTiltRef = useRef(0);
   const fieldOfView = 60;
   const calibrationOffset = 0;
   const MIN_DISTANCE = 6;
 
-  const handleOrientation = (event) => {
-    if (event.beta != null) {
-      const correctedTilt = -(event.beta - 90) + calibrationOffset;
-      setRawTilt(correctedTilt);
-      console.log('rawTilt:', correctedTilt.toFixed(1));
-    }
-  };
-
+  // ⏳ Сглаживание угла (low-pass filter)
   useEffect(() => {
     const interval = setInterval(() => {
-      setSmoothedTilt(prev => {
-        const next = prev * 0.9 + rawTilt * 0.1;
-        smoothedTiltRef.current = next;
-        return next;
-      });
+      setSmoothedTilt((prev) => prev * 0.9 + rawTilt * 0.1);
     }, 50);
-  
     return () => clearInterval(interval);
-  }, []); // ✅ Зависим только от монтирования
-  
+  }, []);
 
   useEffect(() => {
     setShowWarning(Math.abs(smoothedTilt) > 80);
   }, [smoothedTilt]);
 
+  // 📸 Камера + сенсоры
   const startCamera = async () => {
     try {
-      // Разрешение на сенсоры (для iOS)
       if (
         typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function'
@@ -53,7 +39,13 @@ export default function CameraOverlay({ onClose, results = [] }) {
         }
       }
 
-      window.addEventListener('deviceorientation', handleOrientation, true);
+      window.addEventListener('deviceorientation', (event) => {
+        if (event.beta != null) {
+          const corrected = -(event.beta - 90) + calibrationOffset;
+          setRawTilt(corrected);
+          console.log('✅ rawTilt:', corrected.toFixed(1));
+        }
+      }, true);
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: 'environment' } }
@@ -61,18 +53,11 @@ export default function CameraOverlay({ onClose, results = [] }) {
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = async () => {
-          try {
-            await videoRef.current.play();
-            setStreamStarted(true);
-          } catch (err) {
-            console.error('Ошибка play():', err);
-            setError('Ошибка запуска видео');
-          }
-        };
+        await videoRef.current.play();
+        setStreamStarted(true);
       }
     } catch (err) {
-      console.error('Ошибка доступа к камере или сенсорам', err);
+      console.error('Ошибка запуска камеры/сенсоров:', err);
       setError('Ошибка доступа к камере или сенсорам.');
     }
   };
@@ -82,13 +67,12 @@ export default function CameraOverlay({ onClose, results = [] }) {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
-    window.removeEventListener('deviceorientation', handleOrientation, true);
+    window.removeEventListener('deviceorientation', () => {}, true);
     onClose();
   };
 
   const calculateMarkerAngle = (drop, range) => {
-    if (!range) return 0;
-    return Math.atan2(drop / 100, range) * (180 / Math.PI);
+    return range ? Math.atan2(drop / 100, range) * (180 / Math.PI) : 0;
   };
 
   const getMarkerColor = (range) => {
@@ -97,6 +81,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
     return 'red-marker';
   };
 
+  // 📌 Фильтрация меток
   const filteredResults = showAllMarkers
     ? results
     : results.filter(r => [100, 300, 500, 800, 1000].includes(r.range));
@@ -160,6 +145,15 @@ export default function CameraOverlay({ onClose, results = [] }) {
               Выравнивание для точной стрельбы.
             </div>
           )}
+
+          {/* Отладочный блок */}
+          <div style={{
+            position: 'absolute', bottom: '1rem', left: '1rem', color: '#fff',
+            background: 'rgba(0,0,0,0.5)', padding: '0.5rem 0.7rem', borderRadius: '8px', fontSize: '0.9rem'
+          }}>
+            raw: {rawTilt.toFixed(1)}°<br />
+            smooth: {smoothedTilt.toFixed(1)}°
+          </div>
         </>
       )}
 
