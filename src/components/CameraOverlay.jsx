@@ -24,11 +24,16 @@ export default function CameraOverlay({ onClose, results = [] }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      smoothedTiltRef.current = smoothedTiltRef.current * 0.9 + rawTilt * 0.1;
-      setSmoothedTilt(smoothedTiltRef.current);
+      setSmoothedTilt(prev => {
+        const next = prev * 0.9 + rawTilt * 0.1;
+        smoothedTiltRef.current = next;
+        return next;
+      });
     }, 50);
+  
     return () => clearInterval(interval);
-  }, [rawTilt]);
+  }, []); // ✅ Зависим только от монтирования
+  
 
   useEffect(() => {
     setShowWarning(Math.abs(smoothedTilt) > 80);
