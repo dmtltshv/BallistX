@@ -14,15 +14,12 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const calibrationOffset = 0;
   const MIN_DISTANCE = 6;
 
-  const calculateMarkerAngle = (drop, range) => {
-    if (!range) return 0;
-    return Math.atan2(drop / 100, range) * (180 / Math.PI);
-  };
-
-  const getMarkerColor = (range) => {
-    if (range <= 300) return 'green-marker';
-    if (range <= 600) return 'yellow-marker';
-    return 'red-marker';
+  const handleOrientation = (event) => {
+    if (event.beta != null) {
+      const correctedTilt = -(event.beta - 90) + calibrationOffset;
+      setRawTilt(correctedTilt);
+      console.log('rawTilt:', correctedTilt.toFixed(1));
+    }
   };
 
   useEffect(() => {
@@ -34,40 +31,25 @@ export default function CameraOverlay({ onClose, results = [] }) {
   }, [rawTilt]);
 
   useEffect(() => {
-    const askPermission = async () => {
-      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-          const permission = await DeviceOrientationEvent.requestPermission();
-          if (permission === 'granted') {
-            window.addEventListener('deviceorientation', handleOrientation, true);
-          }
-        } catch (err) {
-          console.error('Ошибка запроса разрешения на сенсоры:', err);
-        }
-      } else {
-        window.addEventListener('deviceorientation', handleOrientation, true);
-      }
-    };
-
-    const handleOrientation = (event) => {
-      if (event.beta != null) {
-        const correctedTilt = -(event.beta - 90) + calibrationOffset;
-        setRawTilt(correctedTilt);
-      }
-    };
-
-    askPermission();
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation, true);
-    };
-  }, []);
-
-  useEffect(() => {
     setShowWarning(Math.abs(smoothedTilt) > 80);
   }, [smoothedTilt]);
 
   const startCamera = async () => {
     try {
+      // Разрешение на сенсоры (для iOS)
+      if (
+        typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'
+      ) {
+        const permission = await DeviceOrientationEvent.requestPermission();
+        if (permission !== 'granted') {
+          alert('Разрешите доступ к сенсорам для работы прицела');
+          return;
+        }
+      }
+
+      window.addEventListener('deviceorientation', handleOrientation, true);
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: 'environment' } }
       });
@@ -85,8 +67,8 @@ export default function CameraOverlay({ onClose, results = [] }) {
         };
       }
     } catch (err) {
-      console.error('Ошибка доступа к камере', err);
-      setError('Ошибка доступа к камере.');
+      console.error('Ошибка доступа к камере или сенсорам', err);
+      setError('Ошибка доступа к камере или сенсорам.');
     }
   };
 
@@ -95,7 +77,19 @@ export default function CameraOverlay({ onClose, results = [] }) {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
+    window.removeEventListener('deviceorientation', handleOrientation, true);
     onClose();
+  };
+
+  const calculateMarkerAngle = (drop, range) => {
+    if (!range) return 0;
+    return Math.atan2(drop / 100, range) * (180 / Math.PI);
+  };
+
+  const getMarkerColor = (range) => {
+    if (range <= 300) return 'green-marker';
+    if (range <= 600) return 'yellow-marker';
+    return 'red-marker';
   };
 
   const filteredResults = showAllMarkers
