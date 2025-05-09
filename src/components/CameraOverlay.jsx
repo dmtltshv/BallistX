@@ -7,12 +7,23 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const [tiltAngle, setTiltAngle] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
 
-  const fieldOfView = 60; // угол обзора по вертикали
+  const fieldOfView = 60;
   const calibrationOffset = 0;
+  const MIN_DISTANCE = 6;
 
   useEffect(() => {
+    const handleOrientation = (event) => {
+      if (event.beta != null) {
+        const correctedTilt = -(event.beta - 90) + calibrationOffset;
+        setTiltAngle(correctedTilt);
+      }
+    };
+
     const askPermission = async () => {
-      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      if (
+        typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'
+      ) {
         try {
           const permission = await DeviceOrientationEvent.requestPermission();
           if (permission === 'granted') {
@@ -26,26 +37,14 @@ export default function CameraOverlay({ onClose, results = [] }) {
       }
     };
 
-    const handleOrientation = (event) => {
-      if (event.beta != null) {
-        const correctedTilt = -(event.beta - 90) + calibrationOffset;
-        setTiltAngle(correctedTilt);
-      }
-    };
-
     askPermission();
-
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation, true);
     };
   }, []);
 
   useEffect(() => {
-    if (Math.abs(tiltAngle) > 80) {
-      setShowWarning(true);
-    } else {
-      setShowWarning(false);
-    }
+    setShowWarning(Math.abs(tiltAngle) > 80);
   }, [tiltAngle]);
 
   const startCamera = async () => {
@@ -80,28 +79,51 @@ export default function CameraOverlay({ onClose, results = [] }) {
     onClose();
   };
 
+  const calculateMarkerAngle = (drop, range) => {
+    if (!range) return 0;
+    return Math.atan2(drop / 100, range) * (180 / Math.PI);
+  };
+
   const getMarkerColor = (range) => {
     if (range <= 300) return 'green-marker';
     if (range <= 600) return 'yellow-marker';
     return 'red-marker';
   };
 
-  const calculateMarkerAngle = (drop, range) => {
-    if (!range) return 0;
-    return Math.atan2(drop / 100, range) * (180 / Math.PI);
-  };
+  // Подготовка маркеров
+  const positionedMarkers = [];
 
-  let lastTop = null;
+  results
+    .map((r) => {
+      const markerAngle = calculateMarkerAngle(r.drop, r.range);
+      const relativeAngle = markerAngle - tiltAngle;
+
+      if (Math.abs(relativeAngle) > fieldOfView / 2) return null;
+
+      let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
+      topPercent = Math.max(5, Math.min(95, topPercent));
+
+      return {
+        ...r,
+        top: topPercent,
+        relativeAngle,
+        isTargeted: Math.abs(relativeAngle) < 2,
+        colorClass: getMarkerColor(r.range),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.top - b.top)
+    .forEach((marker) => {
+      while (positionedMarkers.some((m) => Math.abs(m.top - marker.top) < MIN_DISTANCE)) {
+        marker.top += MIN_DISTANCE;
+        if (marker.top > 95) break;
+      }
+      positionedMarkers.push(marker);
+    });
 
   return (
     <div className="camera-overlay">
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        className="camera-video"
-      />
+      <video ref={videoRef} autoPlay muted playsInline className="camera-video" />
 
       {streamStarted && (
         <>
@@ -110,37 +132,17 @@ export default function CameraOverlay({ onClose, results = [] }) {
             <div className="crosshair-line vertical" />
           </div>
 
-          {results.length > 0 && results.map((r, index) => {
-            const markerAngle = calculateMarkerAngle(r.drop, r.range);
-            const relativeAngle = markerAngle - tiltAngle;
-
-            if (Math.abs(relativeAngle) > fieldOfView / 2) return null;
-
-            let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
-
-            if (lastTop !== null && Math.abs(topPercent - lastTop) < 7) {
-              topPercent = lastTop + 8;
-            }
-            lastTop = topPercent;
-
-            const colorClass = getMarkerColor(r.range);
-            const isTargeted = Math.abs(relativeAngle) < 2;
-
-            return (
-              <div
-                key={index}
-                className={`marker ${colorClass} ${isTargeted ? 'pulse' : ''}`}
-                style={{
-                  top: `${topPercent}%`,
-                  left: '50%',
-                }}
-              >
-                <div>{r.range} м</div>
-                <div>↓ {r.drop.toFixed(1)} см</div>
-                <div>→ {r.windage.moa.toFixed(1)} MOA</div>
-              </div>
-            );
-          })}
+          {positionedMarkers.map((r, index) => (
+            <div
+              key={index}
+              className={`marker ${r.colorClass} ${r.isTargeted ? 'pulse' : ''}`}
+              style={{ top: `${r.top}%`, left: '50%' }}
+            >
+              <div>{r.range} м</div>
+              <div>↓ {r.drop.toFixed(1)} см</div>
+              <div>→ {r.windage.moa.toFixed(1)} MOA</div>
+            </div>
+          ))}
 
           <div className="tilt-indicator">
             Угол: {tiltAngle.toFixed(1)}°

@@ -524,34 +524,34 @@ label {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   transform: translate(-50%, -50%);
-  border: 2px solid rgba(255, 255, 255, 0.8);
   z-index: 3;
 }
 
 .crosshair-line.horizontal,
 .crosshair-line.vertical {
   position: absolute;
-  background: rgba(255, 255, 255, 0.6);
+  background: white;
 }
 
 .crosshair-line.horizontal {
   top: 50%;
-  left: 0;
-  right: 0;
-  height: 2px;
+  left: -12px;
+  width: 48px;
+  height: 1px;
   transform: translateY(-50%);
 }
 
 .crosshair-line.vertical {
   left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
+  top: -12px;
+  width: 1px;
+  height: 48px;
   transform: translateX(-50%);
 }
+
 
 .pulse {
   animation: pulse 1.4s infinite ease-in-out;
