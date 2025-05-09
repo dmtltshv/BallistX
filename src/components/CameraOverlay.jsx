@@ -98,12 +98,10 @@ export default function CameraOverlay({ onClose, results = [] }) {
     onClose();
   };
 
-  // Фильтрация по предпочтениям
   const filteredResults = showAllMarkers
     ? results
     : results.filter(r => [100, 300, 500, 800, 1000].includes(r.range));
 
-  // Вычисление маркеров
   const positionedMarkers = [];
   filteredResults.forEach((r) => {
     const markerAngle = calculateMarkerAngle(r.drop, r.range);
@@ -153,7 +151,9 @@ export default function CameraOverlay({ onClose, results = [] }) {
             );
           })}
 
-          <div className="tilt-indicator">Угол: {smoothedTilt.toFixed(1)}°</div>
+          <div className="angle-indicator">
+            Угол: {smoothedTilt.toFixed(1)}°
+          </div>
 
           {showWarning && (
             <div className="warning-overlay">

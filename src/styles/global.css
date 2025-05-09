@@ -503,6 +503,8 @@ label {
 
 .marker {
   position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background-color: rgba(0, 0, 0, 0.5);
   padding: 6px 10px;
   border-radius: 8px;
