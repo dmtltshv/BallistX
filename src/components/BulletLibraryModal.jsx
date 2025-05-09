@@ -42,7 +42,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
       alert('Заполните все поля');
       return;
     }
-
+  
     const bullet = {
       id: `custom_${Date.now()}`,
       caliber: newBullet.caliber,
@@ -53,10 +53,13 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
       mass: parseFloat(newBullet.weight) / 1000,
       custom: true
     };
-
+  
     try {
       await offlineManager.addBullet(bullet);
-      setCustomBullets([...customBullets, bullet]);
+      setCustomBullets(prev => [...prev, bullet]);
+      if (onAddCustomBullet) {
+        onAddCustomBullet(bullet); // <<< добавляем в глобальное состояние
+      }
       setNewBullet({ caliber: '', name: '', weight: '', bc: '' });
       setActiveTab('custom');
     } catch (error) {
@@ -64,6 +67,8 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
       alert('Ошибка сохранения пули');
     }
   };
+  ________________________________________
+  
 
   const handleDeleteBullet = async (id) => {
     if (!window.confirm('Удалить этот патрон из библиотеки?')) return;
