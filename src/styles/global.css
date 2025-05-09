@@ -553,23 +553,6 @@ label {
   transform: translateX(-50%);
 }
 
-
-.pulse {
-  animation: pulse 1.4s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-  }
-}
-
 .tilt-indicator {
   position: absolute;
   top: 1rem;

@@ -11,7 +11,6 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const calibrationOffset = 0;
   const MIN_DISTANCE = 6;
 
-
   useEffect(() => {
     const handleOrientation = (event) => {
       if (event.beta != null) {
@@ -133,27 +132,17 @@ export default function CameraOverlay({ onClose, results = [] }) {
             <div className="crosshair-line vertical" />
           </div>
 
-          {positionedMarkers.map((r, index) => {
-          const tolerance = Math.max(0.3, 0.005 * r.range);
-          const isTargeted = Math.abs(r.relativeAngle) < tolerance;
-          const colorClass = getMarkerColor(r.range);
-
-          return (
+          {positionedMarkers.map((r, index) => (
             <div
               key={index}
-              className={`marker ${colorClass} ${isTargeted ? 'pulse' : ''}`}
-              style={{
-                top: `${r.top}%`,
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-              }}
+              className={`marker ${r.colorClass} ${r.isTargeted ? 'pulse' : ''}`}
+              style={{ top: `${r.top}%`, left: '50%' }}
             >
               <div>{r.range} м</div>
               <div>↓ {r.drop.toFixed(1)} см</div>
               <div>→ {r.windage.moa.toFixed(1)} MOA</div>
             </div>
-          );
-        })}
+          ))}
 
           <div className="tilt-indicator">
             Угол: {tiltAngle.toFixed(1)}°
