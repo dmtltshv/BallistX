@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { FaTimes, FaPlus, FaTrash, FaCheck } from 'react-icons/fa';
 
@@ -42,7 +43,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
       alert('Заполните все поля');
       return;
     }
-  
+
     const bullet = {
       id: `custom_${Date.now()}`,
       caliber: newBullet.caliber,
@@ -53,13 +54,10 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
       mass: parseFloat(newBullet.weight) / 1000,
       custom: true
     };
-  
+
     try {
       await offlineManager.addBullet(bullet);
       setCustomBullets(prev => [...prev, bullet]);
-      if (onAddCustomBullet) {
-        onAddCustomBullet(bullet); // <<< добавляем в глобальное состояние
-      }
       setNewBullet({ caliber: '', name: '', weight: '', bc: '' });
       setActiveTab('custom');
     } catch (error) {
@@ -93,15 +91,15 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager }
         </div>
 
         <div className="modal-tabs">
-          <button className={`tab-btn ${activeTab === 'library' ? 'active' : ''}`} onClick={() => setActiveTab('library')}>
-            Стандартные
-          </button>
-          <button className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`} onClick={() => setActiveTab('custom')}>
-            Мои патроны
-          </button>
-          <button className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`} onClick={() => setActiveTab('add')}>
-            Добавить
-          </button>
+          {['library', 'custom', 'add'].map(tab => (
+            <button
+              key={tab}
+              className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab === 'library' ? 'Стандартные' : tab === 'custom' ? 'Мои патроны' : 'Добавить'}
+            </button>
+          ))}
         </div>
 
         <div className="modal-content">
