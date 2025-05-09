@@ -4,61 +4,71 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const videoRef = useRef(null);
   const [streamStarted, setStreamStarted] = useState(false);
   const [error, setError] = useState('');
-  const [rawTilt, setRawTilt] = useState(0);
-  const [smoothedTilt, setSmoothedTilt] = useState(0);
+  const [tiltAngle, setTiltAngle] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
-  const [showAllMarkers, setShowAllMarkers] = useState(false);
 
-  const fieldOfView = 60;
+  const fieldOfView = 60; // угол обзора по вертикали
   const calibrationOffset = 0;
-  const MIN_DISTANCE = 6;
 
-  // ⏳ Сглаживание угла (low-pass filter)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSmoothedTilt((prev) => prev * 0.9 + rawTilt * 0.1);
-    }, 50);
-    return () => clearInterval(interval);
+    const askPermission = async () => {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const permission = await DeviceOrientationEvent.requestPermission();
+          if (permission === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientation, true);
+          }
+        } catch (err) {
+          console.error('Ошибка запроса разрешения на сенсоры:', err);
+        }
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation, true);
+      }
+    };
+
+    const handleOrientation = (event) => {
+      if (event.beta != null) {
+        const correctedTilt = -(event.beta - 90) + calibrationOffset;
+        setTiltAngle(correctedTilt);
+      }
+    };
+
+    askPermission();
+
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation, true);
+    };
   }, []);
 
   useEffect(() => {
-    setShowWarning(Math.abs(smoothedTilt) > 80);
-  }, [smoothedTilt]);
+    if (Math.abs(tiltAngle) > 80) {
+      setShowWarning(true);
+    } else {
+      setShowWarning(false);
+    }
+  }, [tiltAngle]);
 
-  // 📸 Камера + сенсоры
   const startCamera = async () => {
     try {
-      if (
-        typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function'
-      ) {
-        const permission = await DeviceOrientationEvent.requestPermission();
-        if (permission !== 'granted') {
-          alert('Разрешите доступ к сенсорам для работы прицела');
-          return;
-        }
-      }
-
-      window.addEventListener('deviceorientation', (event) => {
-        if (event.beta != null) {
-          const corrected = -(event.beta - 90) + calibrationOffset;
-          setRawTilt(corrected);
-          console.log('✅ rawTilt:', corrected.toFixed(1));
-        }
-      }, true);
-
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } }
+        video: { facingMode: { ideal: "environment" } }
       });
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setStreamStarted(true);
+        videoRef.current.onloadedmetadata = async () => {
+          try {
+            await videoRef.current.play();
+            setStreamStarted(true);
+          } catch (err) {
+            console.error('Ошибка play():', err);
+            setError('Ошибка запуска видео');
+          }
+        };
       }
     } catch (err) {
-      console.error('Ошибка запуска камеры/сенсоров:', err);
-      setError('Ошибка доступа к камере или сенсорам.');
+      console.error('Ошибка доступа к камере', err);
+      setError('Ошибка доступа к камере.');
     }
   };
 
@@ -67,12 +77,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
-    window.removeEventListener('deviceorientation', () => {}, true);
     onClose();
-  };
-
-  const calculateMarkerAngle = (drop, range) => {
-    return range ? Math.atan2(drop / 100, range) * (180 / Math.PI) : 0;
   };
 
   const getMarkerColor = (range) => {
@@ -81,31 +86,22 @@ export default function CameraOverlay({ onClose, results = [] }) {
     return 'red-marker';
   };
 
-  // 📌 Фильтрация меток
-  const filteredResults = showAllMarkers
-    ? results
-    : results.filter(r => [100, 300, 500, 800, 1000].includes(r.range));
+  const calculateMarkerAngle = (drop, range) => {
+    if (!range) return 0;
+    return Math.atan2(drop / 100, range) * (180 / Math.PI);
+  };
 
-  const positionedMarkers = [];
-  filteredResults.forEach((r) => {
-    const markerAngle = calculateMarkerAngle(r.drop, r.range);
-    const relativeAngle = markerAngle - smoothedTilt;
-    if (Math.abs(relativeAngle) > fieldOfView / 2) return;
-
-    let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
-    topPercent = Math.max(5, Math.min(95, topPercent));
-
-    while (positionedMarkers.some(m => Math.abs(m.top - topPercent) < MIN_DISTANCE)) {
-      topPercent += MIN_DISTANCE;
-      if (topPercent > 95) break;
-    }
-
-    positionedMarkers.push({ ...r, top: topPercent, relativeAngle });
-  });
+  let lastTop = null;
 
   return (
     <div className="camera-overlay">
-      <video ref={videoRef} autoPlay muted playsInline className="camera-video" />
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        className="camera-video"
+      />
 
       {streamStarted && (
         <>
@@ -114,18 +110,29 @@ export default function CameraOverlay({ onClose, results = [] }) {
             <div className="crosshair-line vertical" />
           </div>
 
-          {positionedMarkers.map((r, index) => {
-            const isTargeted = Math.abs(r.relativeAngle) < 2;
+          {results.length > 0 && results.map((r, index) => {
+            const markerAngle = calculateMarkerAngle(r.drop, r.range);
+            const relativeAngle = markerAngle - tiltAngle;
+
+            if (Math.abs(relativeAngle) > fieldOfView / 2) return null;
+
+            let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
+
+            if (lastTop !== null && Math.abs(topPercent - lastTop) < 7) {
+              topPercent = lastTop + 8;
+            }
+            lastTop = topPercent;
+
             const colorClass = getMarkerColor(r.range);
+            const isTargeted = Math.abs(relativeAngle) < 2;
 
             return (
               <div
                 key={index}
                 className={`marker ${colorClass} ${isTargeted ? 'pulse' : ''}`}
                 style={{
-                  top: `${r.top}%`,
+                  top: `${topPercent}%`,
                   left: '50%',
-                  transform: 'translate(-50%, -50%)'
                 }}
               >
                 <div>{r.range} м</div>
@@ -135,8 +142,8 @@ export default function CameraOverlay({ onClose, results = [] }) {
             );
           })}
 
-          <div className="angle-indicator">
-            Угол: {smoothedTilt.toFixed(1)}°
+          <div className="tilt-indicator">
+            Угол: {tiltAngle.toFixed(1)}°
           </div>
 
           {showWarning && (
@@ -145,29 +152,17 @@ export default function CameraOverlay({ onClose, results = [] }) {
               Выравнивание для точной стрельбы.
             </div>
           )}
-
-          {/* Отладочный блок */}
-          <div style={{
-            position: 'absolute', bottom: '1rem', left: '1rem', color: '#fff',
-            background: 'rgba(0,0,0,0.5)', padding: '0.5rem 0.7rem', borderRadius: '8px', fontSize: '0.9rem'
-          }}>
-            raw: {rawTilt.toFixed(1)}°<br />
-            smooth: {smoothedTilt.toFixed(1)}°
-          </div>
         </>
       )}
 
       <div className="camera-controls">
         {!streamStarted && (
-          <button className="btn-glow start-btn" onClick={startCamera}>
+          <button className="start-btn" onClick={startCamera}>
             Включить камеру
           </button>
         )}
-        <button className="btn-glow close-btn" onClick={stopCamera}>
+        <button className="close-btn" onClick={stopCamera}>
           Закрыть
-        </button>
-        <button className="btn-glow toggle-btn" onClick={() => setShowAllMarkers(prev => !prev)}>
-          {showAllMarkers ? 'Скрыть лишние' : 'Показать все'}
         </button>
         {error && <div className="camera-error">{error}</div>}
       </div>

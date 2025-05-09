@@ -423,28 +423,6 @@ label {
   }
 }
 
-.camera-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: black;
-  z-index: 9999; /* выше всех */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.camera-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 1;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: transparent;
-}
-
 .crosshair,
 .marker,
 .tilt-indicator,
@@ -454,12 +432,6 @@ label {
   z-index: 2;
 }
 
-.camera-controls {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 4;
-}
 
 .close-btn {
   padding: 0.5rem 1rem;
@@ -468,17 +440,6 @@ label {
   color: white;
   border-radius: 8px;
   font-weight: bold;
-}
-
-.crosshair {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 30px;
-  height: 30px;
-  transform: translate(-50%, -50%);
-  border: 2px solid rgba(255,255,255,0.8);
-  z-index: 3;
 }
 
 .modal-tabs {
@@ -501,36 +462,6 @@ label {
   z-index: 3;
 }
 
-.marker {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 6px 10px;
-  border-radius: 8px;
-  color: white;
-  text-align: center;
-  pointer-events: none;
-  white-space: nowrap;
-  font-size: 0.9rem;
-  transition: top 0.15s ease-out;
-}
-
-.green-marker { border: 2px solid lime; }
-.yellow-marker { border: 2px solid gold; }
-.red-marker { border: 2px solid crimson; }
-
-.pulse {
-  animation: pulse-animation 1.5s infinite;
-  transform-origin: center;
-}
-
-
-@keyframes pulse-animation {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
 .toggle-btn {
   margin-top: 0.5rem;
   padding: 0.5rem 1rem;
@@ -538,4 +469,157 @@ label {
   color: #fff;
   border: 1px solid #00ffcc;
   border-radius: 8px;
+}
+
+.camera-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9999;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: var(--text-primary);
+}
+
+.camera-video {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+/* Перекрестие */
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+
+.crosshair-line {
+  position: absolute;
+  background-color: var(--accent-color);
+  opacity: 0.7;
+}
+
+.crosshair-line.horizontal {
+  width: 100vw;
+  height: 2px;
+  top: 0;
+  left: -50vw;
+}
+
+.crosshair-line.vertical {
+  height: 100vh;
+  width: 2px;
+  left: 0;
+  top: -50vh;
+}
+
+/* Маркеры */
+.marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 6px 10px;
+  border-radius: 10px;
+  background-color: var(--card-bg-dark);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-align: center;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+  transition: top 0.2s ease;
+}
+
+.green-marker {
+  background-color: #5CDB95;
+  color: #1E201E;
+}
+
+.yellow-marker {
+  background-color: #EDF5E1;
+  color: #1E201E;
+}
+
+.red-marker {
+  background-color: #8EE4AF;
+  color: #1E201E;
+}
+
+.pulse {
+  animation: pulseMarker 1.5s infinite;
+}
+
+@keyframes pulseMarker {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Угол наклона */
+.tilt-indicator {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: rgba(0,0,0,0.4);
+  padding: 6px 12px;
+  border-radius: 12px;
+}
+
+/* Визуальное предупреждение */
+.warning-overlay {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--danger-color);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: var(--shadow);
+  max-width: 90%;
+}
+
+/* Кнопки */
+.camera-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 1001;
+}
+
+.camera-controls button {
+  padding: 10px 18px;
+  font-weight: bold;
+  border-radius: 10px;
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.camera-controls button:hover {
+  background-color: var(--primary-color);
+}
+
+.camera-error {
+  margin-top: 10px;
+  color: var(--danger-color);
+  background: rgba(255, 0, 0, 0.1);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
 }
