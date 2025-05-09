@@ -149,6 +149,10 @@ export default function CameraOverlay({ onClose, results = [] }) {
             Включить камеру
           </button>
         )}
+        <div className="angle-indicator">
+          {tiltAngle.toFixed(1)}°
+        </div>
+        <div className="crosshair" />
         <button className="btn-glow close-btn" onClick={stopCamera}>
           Закрыть
         </button>
