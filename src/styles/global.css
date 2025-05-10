@@ -293,15 +293,21 @@ label {
   align-items: stretch;
 }
 
-.modal-panel {
+.bullet-list {
   width: 100%;
-  max-width: 540px;
-  background: var(--bg);
-  animation: slideInFromRight 0.3s ease-out;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
 }
 
+.modal-panel {
+  max-width: 540px;
+  animation: slideInFromRight 0.3s ease-out;
+  overflow-y: auto;
+}
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+}
 @keyframes slideInFromRight {
   from {
     transform: translateX(100%);
@@ -458,29 +464,35 @@ label {
 }
 
 .session-item {
-  padding: 1rem;
-  font-size: 0.95rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  box-sizing: border-box;
   margin-bottom: 1rem;
-  max-width: 100%;
+  width: fit-content; /* ⬅️ карточка по ширине содержимого */
+  min-width: 240px;   /* ⬅️ можно задать минимальную ширину для красоты */
 }
+
+.session-text h4,
+.session-text p {
+  margin: 0;
+}
+
 .session-actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
 }
+
 .small-btn {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
-  align-self: flex-start;
 }
 
-.sessions-column {
-  flex: 1 1 100%;
-  max-width: 100%;
-}
 
 .details-column {
   flex: 2;
@@ -547,10 +559,6 @@ label {
 
 /* === Mobile Responsiveness === */
 @media (max-width: 768px) {
-  .sessions-column {
-    flex: 1 1 320px;
-  }
-
   .details-column {
     flex: 2 1 0;
   }
@@ -889,11 +897,6 @@ label {
   transform: scale(1.1);
 }
 
-.export-btn {
-  margin-right: 1rem;
-}
-
-
 .save-btn {
   display: block;
   font-size: 1rem;
@@ -904,12 +907,22 @@ label {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 1rem;
+}
+
+button.btn-glow.load-btn {
+  margin: auto;
+}
+
+button.btn-glow.add-btn {
+  margin: auto;
 }
 
 .bullet-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  gap: 1rem;
 }
 
 .bullet-select-wrapper {
@@ -986,7 +999,7 @@ label {
   border: none;
   cursor: pointer;
   z-index: 9999;
-  backdrop-filter: blur(1px);
+  backdrop-filter: var(--glass-blur);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: background 0.2s ease, transform 0.2s ease;
   display: flex;
@@ -1016,7 +1029,7 @@ label {
   padding: 1rem 1.25rem;
   border-radius: 1.25rem;
   background: rgba(255, 255, 255, 0.001);
-  backdrop-filter: blur(1px);
+  backdrop-filter: var(--glass-blur);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   animation: fadeInUp 0.3s ease-out forwards;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1107,4 +1120,11 @@ label {
 .action-btn {
   max-width: 100%;
   min-width: 200px;
+}
+
+.empty-state {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-content: center;
 }

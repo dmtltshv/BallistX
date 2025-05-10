@@ -134,7 +134,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
                     </div>
                   </div>
                   <button onClick={() => handleBulletSelect(bullet)} className="btn-glow select-btn">
-                    <FiCheck /> Выбрать
+                    <FiCheck />
                   </button>
                 </div>
               ))}
@@ -155,10 +155,10 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
                     </div>
                     <div className="bullet-actions">
                       <button onClick={() => { onSelect(bullet); onClose(); }} className="btn-glow select-btn">
-                        <FiCheck /> Выбрать
+                        <FiCheck />
                       </button>
                       <button onClick={() => handleDeleteBullet(bullet.id)} className="btn-glow delete-btn">
-                        <FiTrash2 /> Удалить
+                        <FiTrash2 />
                       </button>
                     </div>
                   </div>

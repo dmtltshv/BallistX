@@ -142,35 +142,53 @@ const JournalModal = ({
         </button>
       </div>
 
-      <div className="modal-content two-columns">
-        <div className={`sessions-column ${selectedSession ? '' : 'full-width'}`}>
+      <div className="modal-content">
+        <div>
           {isLoading && <div className="loading">Загрузка...</div>}
           {sessions.length > 0 && sessions.map(session => (
-            <div key={session.id} className={`session-item card-glass ${selectedSession?.id === session.id ? 'active' : ''}`}>
+            <div
+            key={session.id}
+            className={`session-item card-glass ${selectedSession?.id === session.id ? 'active' : ''}`}
+          >
+            <div className="session-text">
               <h4>{new Date(session.date).toLocaleString()}</h4>
               <p>{session.bulletName}</p>
-              <div className="session-actions">
-                <button className="btn-glow export-btn" onClick={(e) => { e.stopPropagation(); exportToCSV(session); }}>
-                  <FiDownload />
-                </button>
-                <button className="btn-glow delete-btn" onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }}>
-                  <FiTrash2 />
-                </button>
-              </div>
-              <button
-              className="btn-glow small-btn"
-              onClick={() => {
-                setSelectedSession(session);
-                setTimeout(() => {
-                  if (modalRef.current && detailsRef.current) {
-                    detailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 50); // чтобы DOM успел отрендериться
-              }}
-            >
-              Подробнее
-            </button>
             </div>
+          
+            <div className="session-actions">
+              <button
+                className="btn-glow small-btn"
+                onClick={() => {
+                  setSelectedSession(session);
+                  setTimeout(() => {
+                    if (modalRef.current && detailsRef.current) {
+                      detailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 50);
+                }}
+              >
+                Подробнее
+              </button>
+              <button
+                className="btn-glow export-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  exportToCSV(session);
+                }}
+              >
+                <FiDownload />
+              </button>
+              <button
+                className="btn-glow delete-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteSession(session.id);
+                }}
+              >
+                <FiTrash2 />
+              </button>
+            </div>
+          </div>          
           ))}
         </div>
 

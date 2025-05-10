@@ -209,19 +209,26 @@ useEffect(() => {
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('ballistic-theme', newTheme);
   };
-  
-  useEffect(() => {
-    const saved = localStorage.getItem('ballistic-theme');
-    const initialTheme = saved || document.documentElement.getAttribute('data-theme') || 'light';
-  
-    setTheme(initialTheme);
-    document.documentElement.setAttribute('data-theme', initialTheme);
-  }, []);
-  
+
+ useEffect(() => {
+  const saved = localStorage.getItem('ballistic-theme');
+  const initialTheme = saved || document.documentElement.getAttribute('data-theme') || 'light';
+
+  setTheme(initialTheme);
+  document.documentElement.setAttribute('data-theme', initialTheme);
+}, []);
+
   return (
     <div className={`calculator-container ${isFieldMode ? 'field-mode' : ''} main-layout ${results?.length > 0 ? 'has-results' : 'no-results'}`}>
      <>
-     <button className="floating-burger" onClick={() => setMenuOpen(!menuOpen)}>
+    <button
+      className="floating-burger"
+      onClick={() => {
+        setMenuOpen(prev => !prev);
+        setShowLibrary(false);
+        setShowJournal(false);
+      }}
+    >
       <FiMenu className="menu-icon" />
     </button>
 
