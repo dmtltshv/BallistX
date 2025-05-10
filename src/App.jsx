@@ -26,8 +26,8 @@ function App() {
       <Routes>
         <Route path="/" element={<BallisticCalculator />} />
         <Route path="/chart" element={<TrajectoryChartPage />} />
+        <Route path="/chart-image" element={<TrajectoryChartImage />} />
       </Routes>
-      <Route path="/chart-image" element={<TrajectoryChartImage />} />
     </BrowserRouter>
   );
 }
