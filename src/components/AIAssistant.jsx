@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Markdown from 'react-markdown';
-import {FiSmile, FiLoader} from 'react-icons/fi';
+import { FiSmile, FiLoader } from 'react-icons/fi';
 
-const AIAssistant = ({ results, bullet, conditions, isFieldMode }) => {
+const AIAssistant = ({ results, bullet, conditions }) => {
   const [recommendations, setRecommendations] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -12,49 +12,67 @@ const AIAssistant = ({ results, bullet, conditions, isFieldMode }) => {
     try {
       const prompt = createPrompt(data);
 
-      const response = await fetch('https://api.deepinfra.com/v1/openai/chat/completions', {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.REACT_APP_DEEPINFRA_API_KEY}`
+          'Authorization': `Bearer ${process.env.REACT_APP_OPENROUTER_API_KEY}`,
+          'HTTP-Referer': 'http://localhost:3000',
+          'X-Title': 'BallistX AI Assistant'
         },
         body: JSON.stringify({
-          model: "meta-llama/Meta-Llama-3-70B-Instruct",
+          model: 'deepseek/deepseek-prover-v2:free',
           messages: [
             {
-              role: "system",
-              content: isFieldMode
-                ? "Ты военный баллистик. Давай краткие четкие рекомендации для полевых условий на русском языке."
-                : "Ты профессиональный баллистик. Давай развернутый анализ с техническими деталями на русском языке."
+              role: 'system',
+              content: 'Ты профессиональный баллистик. Дай развернутый анализ с техническими деталями на русском языке.'
             },
             {
-              role: "user",
+              role: 'user',
               content: prompt
             }
           ],
-          temperature: isFieldMode ? 0.3 : 0.7,
-          max_tokens: isFieldMode ? 500 : 1000
+          temperature: 0.7,
+          max_tokens: 1000
         })
       });
 
       if (!response.ok) throw new Error(`API error: ${response.status}`);
       const result = await response.json();
-      return result.choices[0]?.message?.content || "Не удалось получить ответ";
+      return result.choices[0]?.message?.content || 'Ответ от AI пуст';
     } catch (err) {
-      console.error("AI request failed:", err);
+      console.error('AI request failed:', err);
       throw err;
     }
   };
 
-  const createPrompt = (data) => {
-    if (isFieldMode) {
-      return `Дай краткие практические рекомендации для стрельбы в полевых условиях:\n- Патрон: ${data.bullet.caliber} ${data.bullet.name}\n- Ветер: ${data.conditions.windSpeed} м/с, угол ${data.conditions.windAngle}°\n- Основные поправки на 100м, 200м, 300м\nФормат: маркированный список из 3-5 пунктов`;
-    }
+  const createPrompt = ({ bullet, conditions, trajectory }) => {
+    return `Ты профессиональный баллистик. Проанализируй баллистическую информацию и выдай структурированный, лаконичный и технически точный отчёт на русском языке. Стиль — инженерный справочник. Не используй вступления. Только по делу. Формат: заголовки и списки.
 
-    return `Дай детальный баллистический анализ:\n**Патрон**: ${data.bullet.caliber} ${data.bullet.name} (${data.bullet.weight}г, BC ${data.bullet.bc})\n**Погода**: ветер ${data.conditions.windSpeed} м/с, ${data.conditions.temperature}°C, ${data.conditions.pressure} мм рт.ст.\n**Траектория**:\n${data.trajectory
-      .filter((_, i) => i % 3 === 0)
-      .map(r => `${r.range}м: ↓${r.drop.toFixed(1)}см, ↷${r.windage.moa.toFixed(1)}MOA`).join('\n')}
-Проанализируй: оптимальные дистанции, поправки на ветер, влияние погоды, практические советы.`;
+## Данные пули:
+- Калибр: ${bullet.caliber}
+- Название: ${bullet.name}
+- Вес: ${bullet.weight} г
+- Баллистический коэффициент (BC): ${bullet.bc}
+
+## Условия:
+- Температура: ${conditions.temperature}°C
+- Давление: ${conditions.pressure} мм рт.ст.
+- Ветер: ${conditions.windSpeed} м/с, угол ${conditions.windAngle}°
+
+## Таблица отклонений:
+${trajectory
+  .filter((_, i) => i % 2 === 0 && i <= 12)
+  .map(r => `- ${r.range}м: ↓${r.drop.toFixed(1)} см, →${r.windage.moa.toFixed(1)} MOA`)
+  .join('\n')}
+
+## Структура отчёта:
+
+1. **Оптимальная пристрелка** — дистанция + объяснение.
+2. **Поправки на ветер и температуру** — в цифрах.
+3. **Анализ точности** — что сильнее всего влияет.
+4. **Практические советы** — как стрелять точнее.
+5. **Рекомендации по улучшению** — смена пуль, оборудования, подхода.`;
   };
 
   const generateRecommendations = async () => {
@@ -69,8 +87,7 @@ const AIAssistant = ({ results, bullet, conditions, isFieldMode }) => {
       const aiResponse = await getAIRecommendations(analysisData);
       setRecommendations(aiResponse);
     } catch (err) {
-      console.error("AI Error:", err);
-      setError("Ошибка подключения к AI. Проверьте интернет.");
+      setError('Ошибка подключения к AI. Проверьте интернет.');
       setRecommendations(getFallbackRecommendations());
     } finally {
       setIsLoading(false);
@@ -78,17 +95,24 @@ const AIAssistant = ({ results, bullet, conditions, isFieldMode }) => {
   };
 
   const getFallbackRecommendations = () => {
-    if (isFieldMode) {
-      return `1. Поправка на ветер: ${(conditions.windSpeed * 0.5).toFixed(1)} MOA/100м\n2. Основная дистанция: ${results[3]?.range || 100}м\n3. Используйте баллистический калькулятор для точных значений`;
-    }
+    return `## Оффлайн-анализ (сокращённый)
 
-    return `## Оффлайн-рекомендации\nДля точного анализа требуется интернет-соединение.\n\nОсновные параметры:\n- Калибр: ${bullet?.caliber || 'не выбран'}\n- Скорость ветра: ${conditions.windSpeed} м/с\n- Температура: ${conditions.temperature}°C`;
+**Патрон:** ${bullet?.caliber || '-'} ${bullet?.name || '-'}
+
+**Условия:**  
+- Ветер: ${conditions.windSpeed} м/с  
+- Температура: ${conditions.temperature}°C  
+
+Для полного анализа требуется интернет-соединение.`;
   };
 
   return (
-    <div className={`ai-assistant card-glass ${isFieldMode ? 'field-mode' : ''}`}>
+    <div className="ai-assistant card-glass">
       <div className="section-title-row">
-        <h3 className="section-title" style={{margin:'0'}}><FiSmile className="section-icon" />{isFieldMode ? 'Рекомендации' : 'Баллистический анализ'}</h3>
+        <h3 className="section-title" style={{ margin: '0' }}>
+          <FiSmile className="section-icon" />
+          Баллистический анализ
+        </h3>
         <button className="btn" onClick={generateRecommendations} disabled={isLoading || !bullet}>
           {isLoading ? (<><FiLoader className="spin" /> Анализ...</>) : 'Получить рекомендации'}
         </button>
@@ -104,11 +128,7 @@ const AIAssistant = ({ results, bullet, conditions, isFieldMode }) => {
           <div className="recommendations">
             {error && <div className="error" style={{ color: 'tomato', marginBottom: '0.5rem' }}>{error}</div>}
             <div className="markdown-content">
-              <Markdown>
-                {recommendations || (isFieldMode
-                  ? 'Нажмите кнопку для кратких рекомендаций'
-                  : 'Нажмите кнопку для полного анализа')}
-              </Markdown>
+              <Markdown>{recommendations || 'Нажмите кнопку для получения анализа.'}</Markdown>
             </div>
             {lastUpdated && (
               <div className="last-updated" style={{ fontSize: '0.8rem', color: 'gray' }}>

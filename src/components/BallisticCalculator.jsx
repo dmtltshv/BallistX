@@ -330,12 +330,14 @@ useEffect(() => {
                 onClose={() => setShowCamera(false)} // 👈 и это тоже
               />
             )}
-              <AIAssistant
+          {!isFieldMode && (
+          <AIAssistant
             results={results}
             bullet={bullet}
             conditions={conditions}
-            isFieldMode={isFieldMode}
+            isFieldMode={false} // можно даже не передавать, но оставим для совместимости
           />
+        )}
         </div>
          </>
           )}
