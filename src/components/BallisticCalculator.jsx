@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import InputForm from './InputForm';
 import ResultsTable from './ResultsTable';
 import TrajectoryChart from './TrajectoryChart';
@@ -8,13 +8,12 @@ import BulletLibraryModal from './BulletLibraryModal';
 import JournalModal from './JournalModal';
 import AIAssistant from './AIAssistant';
 import VoiceControl from './VoiceControl';
-import ThemeToggle from './ThemeToggle';
 import CameraOverlay from './CameraOverlay';
-import { FaSun, FaMoon } from 'react-icons/fa';
+import {FiBook, FiClock, FiSettings, FiSun, FiMoon, FiMenu} from 'react-icons/fi';
 import { calculateTrajectory } from '../services/ballisticCalculations';
 import ballisticData from '../data/ballisticData';
 import OfflineManager from '../services/OfflineManager';
-import { ReactComponent as BallistXLogo } from '../assets/ballistx_logo_icon.svg';
+import { ReactComponent as BallistXLogo } from '../assets/logo.svg';
 
 
 <a href="/" className="logo-link">
@@ -47,7 +46,9 @@ const BallisticCalculator = () => {
     return JSON.parse(localStorage.getItem('ballistic-field-mode')) || false;
   });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('ballistic-theme') || 'light';
+  });  
   const [customBullets, setCustomBullets] = useState([]);
   const [showCamera, setShowCamera] = useState(false);
   const [shouldCalculate, setShouldCalculate] = useState(false);
@@ -55,6 +56,26 @@ const BallisticCalculator = () => {
   const handleAddCustomBullet = (bullet) => {
     setCustomBullets(prev => [...prev, bullet]);
   };
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const [closingJournal, setClosingJournal] = useState(false);
+
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setMenuOpen(false);
+    }
+  };
+
+  if (menuOpen) {
+    document.addEventListener('mousedown', handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, [menuOpen]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -72,16 +93,36 @@ const BallisticCalculator = () => {
   }, [isFieldMode]);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('ballistic-theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
     if (shouldCalculate) {
       calculate();
       setShouldCalculate(false);
     }
   }, [shouldCalculate]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+  
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+  
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
+  
+  const handleCloseJournal = () => {
+    if (closingJournal) return;
+    setClosingJournal(true);
+    setTimeout(() => {
+      setShowJournal(false);
+      setClosingJournal(false);
+    }, 300);
+  };
 
   const calculate = () => {
     if (!bullet || !inputValues.velocity) {
@@ -106,6 +147,16 @@ const BallisticCalculator = () => {
     setResults(calculatedResults);
     setOriginalResults(calculatedResults);
     saveSession(calculatedResults);
+  };
+    
+  const [closingLibrary, setClosingLibrary] = useState(false);
+
+  const handleCloseLibrary = () => {
+    setClosingLibrary(true);
+    setTimeout(() => {
+      setShowLibrary(false);
+      setClosingLibrary(false);
+    }, 300); // должно совпадать с длительностью анимации
   };
 
   const saveSession = async (results) => {
@@ -160,7 +211,30 @@ const BallisticCalculator = () => {
   };
  
   return (
-    <div className={`calculator-container \${isFieldMode ? 'field-mode' : ''} main-layout \${results?.length > 0 ? 'has-results' : 'no-results'}`}>
+    <div className={`calculator-container ${isFieldMode ? 'field-mode' : ''} main-layout ${results?.length > 0 ? 'has-results' : 'no-results'}`}>
+     <>
+     <button className="floating-burger" onClick={() => setMenuOpen(!menuOpen)}>
+      <FiMenu className="menu-icon" />
+    </button>
+
+    {menuOpen && (
+      <div className="floating-menu" ref={menuRef}>
+        <button onClick={() => { setShowLibrary(true); setMenuOpen(false); }} className="menu-button">
+          <FiBook className="menu-icon" /> Пули
+        </button>
+        <button onClick={() => { setShowJournal(true); setMenuOpen(false); }} className="menu-button">
+          <FiClock className="menu-icon" /> История
+        </button>
+        <button onClick={() => { setIsFieldMode(!isFieldMode)}} className="menu-button">
+          <FiSettings className="menu-icon" /> Режим
+        </button>
+        <button onClick={() => { toggleTheme()}} className="menu-button">
+          {theme === 'dark' ? <FiSun className="menu-icon" /> : <FiMoon className="menu-icon" />} Тема
+        </button>
+      </div>
+    )}
+    </>
+    
       <div className="app-header">
       <h1 className="visually-hidden">BallistX — баллистический калькулятор</h1>
       <div className="logo-wrapper">
@@ -168,13 +242,6 @@ const BallisticCalculator = () => {
           <BallistXLogo className="logo-icon" />
         </a>
       </div>
-
-        <div className="app-controls">
-          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-          <button className={`btn-glow mode-switch \${isFieldMode ? 'field' : 'full'}`} onClick={() => setIsFieldMode(!isFieldMode)}>
-            {isFieldMode ? (<><FaSun /> Полный режим</>) : (<><FaMoon /> Полевой режим</>)}
-          </button>
-        </div>
       </div>
 
       <div className="calculator-content">
@@ -222,47 +289,54 @@ const BallisticCalculator = () => {
             <>
         <div className="output-section">
               {!isFieldMode && <TrajectoryChart key={theme} results={results} />}
-              <ResultsTable results={results} isFieldMode={isFieldMode} />
+              <ResultsTable results={results} isFieldMode={isFieldMode} onOpenCamera={() => setShowCamera(true)}/>
+              {showCamera && (
+              <CameraOverlay
+                results={results}
+                onClose={() => setShowCamera(false)} // 👈 и это тоже
+              />
+            )}
               <AIAssistant
             results={results}
             bullet={bullet}
             conditions={conditions}
             isFieldMode={isFieldMode}
           />
-          <div className="camera-overlay-trigger">
-          <button className="btn-glow" onClick={() => setShowCamera(true)}>Включить камеру</button>
-        </div>
-          {showCamera && (
-          <CameraOverlay results={results} onClose={() => setShowCamera(false)} />
-        )}
         </div>
          </>
           )}
       </div>
 
-      
-
       {showLibrary && (
-        <div className="modal-overlay">
-          <BulletLibraryModal
-            show={showLibrary}
-            onClose={() => setShowLibrary(false)}
-            bullets={ballisticData}
-            onSelect={setBullet}
-            offlineManager={offlineManager}
-            onAddCustomBullet={handleAddCustomBullet}
-          />
-        </div>
-      )}
+  <div className="modal-overlay" onClick={handleCloseLibrary}>
+    <div className={`modal-panel ${closingLibrary ? 'slide-out' : ''}`}
+      onClick={(e) => e.stopPropagation()}>
+        <BulletLibraryModal
+  show={showLibrary}
+  onClose={handleCloseLibrary}
+          bullets={ballisticData}
+          onSelect={setBullet}
+          offlineManager={offlineManager}
+          onAddCustomBullet={handleAddCustomBullet}
+        />
+      </div>
+    </div>
+)}
 
-      {showJournal && (
-        <div className="modal-overlay">
-          <JournalModal
-            show={showJournal}
-            onClose={() => setShowJournal(false)}
-            offlineManager={offlineManager}
-            onLoadSession={loadSessionHandler}
-          />
+
+{showJournal && (
+  <div className="modal-overlay" onClick={handleCloseJournal}>
+    <div
+      className={`modal-panel ${closingJournal ? 'slide-out' : ''}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <JournalModal
+        show={showJournal}
+        onClose={handleCloseJournal}
+        offlineManager={offlineManager}
+        onLoadSession={loadSessionHandler}
+      />
+      </div>
         </div>
       )}
     </div>

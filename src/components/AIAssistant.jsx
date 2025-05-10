@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Markdown from 'react-markdown';
-import { FaRobot, FaSyncAlt } from 'react-icons/fa';
+import {FiSmile, FiLoader} from 'react-icons/fi';
 
 const AIAssistant = ({ results, bullet, conditions, isFieldMode }) => {
   const [recommendations, setRecommendations] = useState('');
@@ -87,10 +87,10 @@ const AIAssistant = ({ results, bullet, conditions, isFieldMode }) => {
 
   return (
     <div className={`ai-assistant card-glass ${isFieldMode ? 'field-mode' : ''}`}>
-      <div className="form-row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 className="section-title" data-icon="🤖"> {isFieldMode ? 'Рекомендации' : 'Баллистический анализ'}</h3>
+      <div className="section-title-row">
+        <h3 className="section-title" style={{margin:'0'}}><FiSmile className="section-icon" />{isFieldMode ? 'Рекомендации' : 'Баллистический анализ'}</h3>
         <button className="btn" onClick={generateRecommendations} disabled={isLoading || !bullet}>
-          {isLoading ? (<><FaSyncAlt className="spin" /> Анализ...</>) : 'Получить рекомендации'}
+          {isLoading ? (<><FiLoader className="spin" /> Анализ...</>) : 'Получить рекомендации'}
         </button>
       </div>
 

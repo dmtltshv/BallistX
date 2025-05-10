@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
+import {FiBarChart2} from 'react-icons/fi'
 
 const TrajectoryChart = ({ results }) => {
   const chartRef = useRef(null);
@@ -82,7 +83,7 @@ const TrajectoryChart = ({ results }) => {
 
   return (
     <div className="trajectory-chart card-glass">
-      <h3 className="section-title" data-icon="📈">График траектории</h3>
+      <h3 className="section-title"> <FiBarChart2 className="section-icon" /> График траектории</h3>
       <canvas ref={chartRef} />
     </div>
   );

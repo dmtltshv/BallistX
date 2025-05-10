@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { FaTimes, FaPlus, FaTrash, FaCheck } from 'react-icons/fa';
+import {FiBook, FiTrash2, FiCheck, FiX, FiPlus} from 'react-icons/fi';
 
 const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, onAddCustomBullet }) => {
   const [customBullets, setCustomBullets] = useState([]);
@@ -98,13 +97,16 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
   if (!show) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="bullet-library-modal card-glass">
+    <div className="bullet-library-modal card-glass">
         <div className="modal-header">
-          <h2 className="section-title" data-icon="🧱">Библиотека патронов</h2>
-          <button onClick={onClose} className="btn-glow close-button">
-            <FaTimes />
-          </button>
+          <h2 className="section-title"> <FiBook/> Библиотека патронов</h2>
+          <button
+      className="close-button mobile-only"
+      onClick={onClose}
+      aria-label="Закрыть"
+    >
+      <FiX/>
+    </button>
         </div>
 
         <div className="modal-tabs">
@@ -132,7 +134,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
                     </div>
                   </div>
                   <button onClick={() => handleBulletSelect(bullet)} className="btn-glow select-btn">
-                    <FaCheck /> Выбрать
+                    <FiCheck /> Выбрать
                   </button>
                 </div>
               ))}
@@ -153,10 +155,10 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
                     </div>
                     <div className="bullet-actions">
                       <button onClick={() => { onSelect(bullet); onClose(); }} className="btn-glow select-btn">
-                        <FaCheck /> Выбрать
+                        <FiCheck /> Выбрать
                       </button>
                       <button onClick={() => handleDeleteBullet(bullet.id)} className="btn-glow delete-btn">
-                        <FaTrash /> Удалить
+                        <FiTrash2 /> Удалить
                       </button>
                     </div>
                   </div>
@@ -165,7 +167,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
                 <div className="empty-state">
                   <p>Нет пользовательских патронов</p>
                   <button onClick={() => setActiveTab('add')} className="btn-glow add-first-btn">
-                    <FaPlus /> Добавить первый патрон
+                    <FiPlus /> Добавить первый патрон
                   </button>
                 </div>
               )}
@@ -213,7 +215,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
               </div>
               <div className="form-actions">
                 <button onClick={handleAddBullet} className="btn-glow save-btn">
-                  <FaPlus /> Сохранить патрон
+                  <FiPlus /> Сохранить патрон
                 </button>
                 <button onClick={() => setActiveTab('custom')} className="btn-glow cancel-btn">
                   Отмена
@@ -223,7 +225,7 @@ const BulletLibraryModal = ({ show, onClose, bullets, onSelect, offlineManager, 
           )}
         </div>
       </div>
-    </div>
+  
   );
 };
 

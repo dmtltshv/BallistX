@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaTimes, FaTrash, FaFileExport, FaFileCsv, FaFileImage } from 'react-icons/fa';
-import { toJpeg } from 'html-to-image';
+import { useState, useEffect, useRef } from 'react';
+import {FiClock, FiInfo, FiEdit3, FiCalendar, FiTrash2, FiDownload, FiX} from 'react-icons/fi';
 
 const JournalModal = ({ 
   show, 
@@ -18,10 +17,10 @@ const JournalModal = ({
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        onClose(); // вызываем функцию закрытия окна
+        onClose();
       }
     };
-  
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -47,6 +46,9 @@ const JournalModal = ({
 
     loadSessions();
   }, [show, offlineManager]);
+
+  const modalRef = useRef(null);        // на всю модалку
+  const detailsRef = useRef(null);
 
   useEffect(() => {
     if (!selectedSession) return;
@@ -129,84 +131,96 @@ const JournalModal = ({
   if (!show) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="journal-modal card-glass">
-        <div className="modal-header">
-          <h2 className="section-title" data-icon="🕒">Журнал расчетов</h2>
-          <button onClick={onClose} className="btn-glow close-button">
-            <FaTimes />
-          </button>
-        </div>
+    <div className="journal-modal card-glass" ref={modalRef}>
+      <div className="modal-header">
+        <h2 className="section-title">
+          <FiClock className="section-icon" />
+          Журнал расчетов
+        </h2>
+        <button className="close-button mobile-only" onClick={onClose} aria-label="Закрыть">
+          <FiX />
+        </button>
+      </div>
 
-        <div className="modal-content">
-          <div className="sessions-column">
-            {isLoading && <div className="loading">Загрузка...</div>}
-            {sessions.length > 0 ? (
-              sessions.map(session => (
-                <div 
-                  key={session.id} 
-                  className={`session-item card-glass ${selectedSession?.id === session.id ? 'active' : ''}`}
-                  onClick={() => setSelectedSession(session)}
-                >
-                  <h4>{new Date(session.date).toLocaleString()}</h4>
-                  <p>{session.bulletName}</p>
-                  <p>{session.velocity} м/с</p>
-                  <div className="session-actions">
-                    <button className="btn-glow export-btn" onClick={(e) => { e.stopPropagation(); exportToCSV(session); }}>
-                      <FaFileCsv />
-                    </button>
-                    <button className="btn-glow delete-btn" onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }}>
-                      <FaTrash />
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="empty-state">Нет сохраненных сессий</div>
-            )}
-          </div>
-
-          <div className="details-column">
-            {selectedSession && (
-              <div className="session-details card-glass">
-                <h3 className="section-title" data-icon="📌">Детали сессии</h3>
-                <p><strong>Пуля:</strong> {selectedSession.bulletName}</p>
-                <p><strong>Скорость:</strong> {selectedSession.velocity} м/с</p>
-                <p><strong>Пристрелка:</strong> {selectedSession.zeroRange} м</p>
-                <p><strong>Высота прицела:</strong> {selectedSession.scopeHeight} мм</p>
-                <button className="btn-glow load-btn" onClick={() => { onLoadSession(selectedSession); onClose(); }}>
-                  Загрузить
+      <div className="modal-content two-columns">
+        <div className={`sessions-column ${selectedSession ? '' : 'full-width'}`}>
+          {isLoading && <div className="loading">Загрузка...</div>}
+          {sessions.length > 0 && sessions.map(session => (
+            <div key={session.id} className={`session-item card-glass ${selectedSession?.id === session.id ? 'active' : ''}`}>
+              <h4>{new Date(session.date).toLocaleString()}</h4>
+              <p>{session.bulletName}</p>
+              <div className="session-actions">
+                <button className="btn-glow export-btn" onClick={(e) => { e.stopPropagation(); exportToCSV(session); }}>
+                  <FiDownload />
+                </button>
+                <button className="btn-glow delete-btn" onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }}>
+                  <FiTrash2 />
                 </button>
               </div>
-            )}
-
-            {selectedSession && (
-              <div className="notes-section">
-                <h3 className="section-title" data-icon="📝">Заметки</h3>
-                {notes.map(note => (
-                  <div key={note.id} className="note-item card-glass">
-                    <div className="note-date">🗒️ {new Date(note.date).toLocaleString()}</div>
-                    <div className="note-text">{note.text}</div>
-                  </div>
-                ))}
-                <div className="add-note">
-                  <textarea
-                    value={newNote}
-                    onChange={(e) => setNewNote(e.target.value)}
-                    rows="3"
-                    placeholder="Добавить новую заметку..."
-                  />
-                  <button className="btn-glow add-btn" onClick={handleAddNote} disabled={!newNote.trim()}>
-                    Добавить заметку
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+              <button
+              className="btn-glow small-btn"
+              onClick={() => {
+                setSelectedSession(session);
+                setTimeout(() => {
+                  if (modalRef.current && detailsRef.current) {
+                    detailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 50); // чтобы DOM успел отрендериться
+              }}
+            >
+              Подробнее
+            </button>
+            </div>
+          ))}
         </div>
+
+        {selectedSession && (
+          <div className="details-column" ref={detailsRef}>
+            <div className="session-details card-glass">
+              <h3 className="section-title">
+                <FiInfo className="section-icon" />
+                Детали сессии
+              </h3>
+              <p><strong>Пуля:</strong> {selectedSession.bulletName}</p>
+              <p><strong>Скорость:</strong> {selectedSession.velocity} м/с</p>
+              <p><strong>Пристрелка:</strong> {selectedSession.zeroRange} м</p>
+              <p><strong>Высота прицела:</strong> {selectedSession.scopeHeight} мм</p>
+              <button className="btn-glow load-btn" onClick={() => { onLoadSession(selectedSession); onClose(); }}>
+                Загрузить
+              </button>
+            </div>
+
+            <div className="notes-section">
+              <h3 className="section-title">
+                <FiEdit3 className="section-icon" />
+                Заметки
+              </h3>
+              {notes.map(note => (
+                <div key={note.id} className="note-item card-glass">
+                  <div className="note-date">
+                    <FiCalendar className="section-icon" />
+                    {new Date(note.date).toLocaleString()}
+                  </div>
+                  <div className="note-text">{note.text}</div>
+                </div>
+              ))}
+              <div className="add-note">
+                <textarea
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  rows="3"
+                  placeholder="Добавить новую заметку..."
+                />
+                <button className="btn-glow add-btn" onClick={handleAddNote} disabled={!newNote.trim()}>
+                  Добавить заметку
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  );
+  );  
 };
 
 export default JournalModal;

@@ -1,9 +1,22 @@
-const ResultsTable = ({ results, isFieldMode }) => {
+import { FiTable, FiCamera } from 'react-icons/fi';
+
+const ResultsTable = ({ results, isFieldMode, onOpenCamera }) => {
   if (results.length === 0) return null;
+
 
   return (
     <div className={`results-table card-glass ${isFieldMode ? 'field-mode' : ''}`}>
-      <h3 className="section-title" data-icon="📊">Результаты расчета</h3>
+      <div className="section-title-row">
+        <h3 className="section-title" style={{margin:'0'}}>
+          <FiTable className="section-icon" />
+          Результаты расчета
+        </h3>
+        {onOpenCamera && (
+          <button className="btn-glow" onClick={onOpenCamera}>
+            <FiCamera className="section-icon"/>
+          </button>
+        )}
+      </div>
       <div className="table-container">
         <table className="results-table full-width">
           <thead>

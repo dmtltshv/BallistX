@@ -1,20 +1,10 @@
 import { useState, useEffect } from 'react';
 import BallisticCalculator from './components/BallisticCalculator';
-import ThemeToggle from './components/ThemeToggle';
 import './App.css';
 import './styles/global.css';
 
 function App() {
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return savedTheme || (systemPrefersDark ? 'dark' : 'light');
-  });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -29,15 +19,12 @@ function App() {
     };
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-  };
-
   return (
     <div className="app">
       <BallisticCalculator />
+      <footer className="footer">
+        <p>© {new Date().getFullYear()} Dmitrii Latyshev — <a href="https://github.com/dmtltshv" target="_blank" rel="noopener noreferrer">@dmtltshv</a></p>
+      </footer>
     </div>
   );
 }

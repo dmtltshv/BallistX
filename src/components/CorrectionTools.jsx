@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FiTrendingUp, FiRotateCcw, FiEdit } from 'react-icons/fi';
 
 const CorrectionTools = ({ results, originalResults, setResults }) => {
   const [angleCorrection, setAngleCorrection] = useState({
@@ -118,66 +119,70 @@ const CorrectionTools = ({ results, originalResults, setResults }) => {
   };
 
   return (
-    <div className="correction-tools card-glass">
-      <h3 className="section-title" data-icon="🎯">Коррекции</h3>
-      
-      <div className="correction-section">
-        <h4>📐 Угол места</h4>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Дистанция (м):</label>
-            <input
-              type="number"
-              value={angleCorrection.distance}
-              onChange={(e) => setAngleCorrection({...angleCorrection, distance: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Перепад высот (м):</label>
-            <input
-              type="number"
-              value={angleCorrection.elevation}
-              onChange={(e) => setAngleCorrection({...angleCorrection, elevation: e.target.value})}
-            />
-          </div>
+  <div className="correction-tools card-glass">
+    <h3 className="section-title">
+      <FiEdit className="section-icon" /> Коррекции
+    </h3>
+
+    <div className="correction-section">
+      <h4 className="sub-item"><FiTrendingUp /> Угол места</h4>
+      <div className="form-row">
+        <div className="form-group">
+          <label>Дистанция (м):</label>
+          <input
+            type="number"
+            value={angleCorrection.distance}
+            onChange={(e) => setAngleCorrection({ ...angleCorrection, distance: e.target.value })}
+          />
         </div>
-        <button onClick={calculateAngleCorrection} className="btn-glow">Рассчитать угол</button>
-        <div className="correction-result text-sm">
-          Угол: {angleCorrection.angle}°, Коэффициент: {angleCorrection.factor}
+        <div className="form-group">
+          <label>Перепад высот (м):</label>
+          <input
+            type="number"
+            value={angleCorrection.elevation}
+            onChange={(e) => setAngleCorrection({ ...angleCorrection, elevation: e.target.value })}
+          />
         </div>
       </div>
-
-      <div className="correction-section">
-        <h4>⚖️ Наклон оружия</h4>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Угол наклона (°):</label>
-            <input
-              type="number"
-              value={tiltCorrection.angle}
-              onChange={(e) => setTiltCorrection({...tiltCorrection, angle: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Направление:</label>
-            <select
-              value={tiltCorrection.direction}
-              onChange={(e) => setTiltCorrection({...tiltCorrection, direction: e.target.value})}
-            >
-              <option value="left">Влево</option>
-              <option value="right">Вправо</option>
-            </select>
-          </div>
-        </div>
-        <button onClick={calculateTiltCorrection} className="btn-glow">Рассчитать наклон</button>
-        <div className="correction-result text-sm">
-          Смещение: {tiltCorrection.shift} см/100м, Поправка по ветру: {tiltCorrection.windCorrection} MOA
-        </div>
+      <button onClick={calculateAngleCorrection} className="btn-glow">Рассчитать угол</button>
+      <div className="correction-result text-sm">
+        Угол: {angleCorrection.angle}°, Коэффициент: {angleCorrection.factor}
       </div>
-
-      <button onClick={resetCorrections} className="btn-glow btn-restart delete-btn">Сбросить коррекции</button>
     </div>
-  );
+
+    <div className="correction-section">
+      <h4 className="sub-item"><FiRotateCcw /> Наклон оружия</h4>
+      <div className="form-row">
+        <div className="form-group">
+          <label>Угол наклона (°):</label>
+          <input
+            type="number"
+            value={tiltCorrection.angle}
+            onChange={(e) => setTiltCorrection({ ...tiltCorrection, angle: e.target.value })}
+          />
+        </div>
+        <div className="form-group">
+          <label>Направление:</label>
+          <select
+            value={tiltCorrection.direction}
+            onChange={(e) => setTiltCorrection({ ...tiltCorrection, direction: e.target.value })}
+          >
+            <option value="left">Влево</option>
+            <option value="right">Вправо</option>
+          </select>
+        </div>
+      </div>
+      <button onClick={calculateTiltCorrection} className="btn-glow">Рассчитать наклон</button>
+      <div className="correction-result text-sm">
+        Смещение: {tiltCorrection.shift} см/100м, Поправка по ветру: {tiltCorrection.windCorrection} MOA
+      </div>
+    </div>
+
+    <button onClick={resetCorrections} className="btn-glow btn-restart delete-btn">
+       Сбросить коррекции
+    </button>
+  </div>
+);
 };
 
 export default CorrectionTools;
