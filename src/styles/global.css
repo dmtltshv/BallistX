@@ -48,6 +48,16 @@
   box-sizing: border-box;
 }
 
+.chart-scroll-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.chart-scroll-wrapper canvas {
+  display: block;
+  min-width: 700px;
+}
+
 .btn-glow {
   display: flex;
   background-color: var(--accent);
@@ -152,6 +162,9 @@ body {
   background-size: 16px 16px;
   background-position: center;
   background-repeat: repeat;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-hover) transparent;
 }
 
 h1, h2, h3 {
@@ -289,8 +302,9 @@ label {
   background: rgba(0, 0, 0, 0.4);
   z-index: 1000;
   display: flex;
-  justify-content: flex-end;
-  align-items: stretch;
+  justify-content: flex-end; /* чтобы справа */
+  align-items: center;       /* чтобы по вертикали по центру */
+  padding-right: 1rem;       /* чтобы не прилипало к краю */
 }
 
 .bullet-list {
@@ -334,15 +348,18 @@ label {
   animation: slideOutToRight 0.3s ease-in forwards;
 }
 
-.modal, .journal-modal, .bullet-library-modal {
+.modal,
+.journal-modal,
+.bullet-library-modal {
+  background: var(--bg);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
   padding: 1.5rem;
-  box-sizing: border-box;
-  width: 100%;
   max-width: 540px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  margin: 0;
-  box-shadow: none; /* 🔇 Убираем тень от самой модалки, если не нужна */
+  width: 100%;
+  max-height: 90vh;         /* ограничим максимальную высоту */
+  overflow-y: auto;         /* скролл если нужно */
+  border-radius: var(--border-radius);
+  animation: slideInFromRight 0.3s ease-out;
 }
 
 .bullet-library-modal .bullet-item {
@@ -351,7 +368,6 @@ label {
   justify-content: space-between;
   padding: 1rem;
   border-radius: var(--border-radius);
-  background: var(--bg-secondary);
   margin-bottom: 1rem;
   gap: 1rem;
   flex-wrap: wrap;
@@ -1127,4 +1143,23 @@ button.btn-glow.add-btn {
   flex-wrap: wrap;
   flex-direction: column;
   align-content: center;
+}
+
+/* WebKit (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--accent-hover);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent);
 }
