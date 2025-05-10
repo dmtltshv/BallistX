@@ -123,7 +123,26 @@ useEffect(() => {
       setClosingJournal(false);
     }, 300);
   };
-
+  
+  useEffect(() => {
+    const loadCustomBullets = async () => {
+      try {
+        const db = await offlineManager.getDB();
+        const tx = db.transaction('bullets', 'readonly');
+        const store = tx.objectStore('bullets');
+        const request = store.getAll();
+  
+        request.onsuccess = (e) => {
+          setCustomBullets(e.target.result || []);
+        };
+      } catch (error) {
+        console.error('Ошибка загрузки пользовательских пуль:', error);
+      }
+    };
+  
+    loadCustomBullets();
+  }, [offlineManager]);
+  
   const calculate = () => {
     if (!bullet || !inputValues.velocity) {
       alert('Выберите пулю и введите скорость');
