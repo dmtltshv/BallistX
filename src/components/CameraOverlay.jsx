@@ -5,20 +5,21 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const [streamStarted, setStreamStarted] = useState(false);
   const [error, setError] = useState('');
   const [tiltAngle, setTiltAngle] = useState(0);
+  const [calibrationOffset, setCalibrationOffset] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
+  const [hiddenRanges, setHiddenRanges] = useState([]);
 
   const fieldOfView = 60;
-  const calibrationOffset = 0;
   const MIN_DISTANCE = 6;
 
-  useEffect(() => {
-    const handleOrientation = (event) => {
-      if (event.beta != null) {
-        const correctedTilt = -(event.beta - 90) + calibrationOffset;
-        setTiltAngle(correctedTilt);
-      }
-    };
+  const handleOrientation = (event) => {
+    if (event.beta != null) {
+      const correctedTilt = -(event.beta - 90) + calibrationOffset;
+      setTiltAngle(correctedTilt);
+    }
+  };
 
+  useEffect(() => {
     const askPermission = async () => {
       if (
         typeof DeviceOrientationEvent !== 'undefined' &&
@@ -38,10 +39,8 @@ export default function CameraOverlay({ onClose, results = [] }) {
     };
 
     askPermission();
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation, true);
-    };
-  }, []);
+    return () => window.removeEventListener('deviceorientation', handleOrientation, true);
+  }, [calibrationOffset]);
 
   useEffect(() => {
     setShowWarning(Math.abs(tiltAngle) > 80);
@@ -73,10 +72,12 @@ export default function CameraOverlay({ onClose, results = [] }) {
 
   const stopCamera = () => {
     const stream = videoRef.current?.srcObject;
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
+    if (stream) stream.getTracks().forEach(track => track.stop());
     onClose();
+  };
+
+  const calibrateZero = () => {
+    setCalibrationOffset(tiltAngle);
   };
 
   const calculateMarkerAngle = (drop, range) => {
@@ -90,10 +91,10 @@ export default function CameraOverlay({ onClose, results = [] }) {
     return 'red-marker';
   };
 
-  // Подготовка маркеров
-  const positionedMarkers = [];
+  const visibleResults = results.filter(r => !hiddenRanges.includes(r.range));
 
-  results
+  const positionedMarkers = [];
+  visibleResults
     .map((r) => {
       const markerAngle = calculateMarkerAngle(r.drop, r.range);
       const relativeAngle = markerAngle - tiltAngle;
@@ -144,9 +145,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
             </div>
           ))}
 
-          <div className="tilt-indicator">
-            Угол: {tiltAngle.toFixed(1)}°
-          </div>
+          <div className="tilt-indicator">Угол: {tiltAngle.toFixed(1)}°</div>
 
           {showWarning && (
             <div className="warning-overlay">
@@ -154,6 +153,26 @@ export default function CameraOverlay({ onClose, results = [] }) {
               Выравнивание для точной стрельбы.
             </div>
           )}
+
+          <div className="marker-filter-panel">
+            <h4>Метки:</h4>
+            {results.map(r => (
+              <label key={r.range}>
+                <input
+                  type="checkbox"
+                  checked={!hiddenRanges.includes(r.range)}
+                  onChange={() => {
+                    setHiddenRanges(prev =>
+                      prev.includes(r.range)
+                        ? prev.filter(v => v !== r.range)
+                        : [...prev, r.range]
+                    );
+                  }}
+                />
+                {r.range} м
+              </label>
+            ))}
+          </div>
         </>
       )}
 
@@ -163,6 +182,9 @@ export default function CameraOverlay({ onClose, results = [] }) {
             Включить камеру
           </button>
         )}
+        <button className="calibrate-btn" onClick={calibrateZero}>
+          Установить ноль
+        </button>
         <button className="close-btn" onClick={stopCamera}>
           Закрыть
         </button>
