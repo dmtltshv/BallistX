@@ -117,7 +117,12 @@ const TrajectoryChart = ({ results }) => {
       </h3>
 
       {isMobile && (
-        <button onClick={() => navigate('/chart', { state: { results } })}>Открыть график</button>
+      <button
+        onClick={() => navigate('/chart-image', { state: { results } })}
+        className="btn-glow action-btn"
+      >
+        Открыть график
+      </button>
       )}
 
       <div className={`chart-scroll-wrapper ${isMobile ? 'visually-hidden' : ''}`}>
