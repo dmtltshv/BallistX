@@ -107,33 +107,24 @@ export default function CameraOverlay({ onClose, results = [] }) {
 
   const visibleMarkers = results.filter((r) => !hiddenMarkers.includes(r.range));
 
-  const positionedMarkers = [];
-  visibleMarkers
-    .map((r) => {
-      const markerAngle = calculateMarkerAngle(r.drop, r.range);
-      const relativeAngle = markerAngle - (tiltAngle - calibrationOffset);
-      if (Math.abs(relativeAngle) > fieldOfView / 2) return null;
+  const positionedMarkers = visibleMarkers
+  .map((r) => {
+    const markerAngle = calculateMarkerAngle(r.drop, r.range);
+    const relativeAngle = markerAngle - (tiltAngle - calibrationOffset);
 
-      let topPercent = 50 - (relativeAngle / (fieldOfView / 2)) * 50;
-      topPercent = Math.max(5, Math.min(95, topPercent));
+    if (Math.abs(relativeAngle) > fieldOfView / 2) return null;
 
-      return {
-        ...r,
-        top: topPercent,
-        relativeAngle,
-        isTargeted: Math.abs(relativeAngle) < 0.5, 
-        colorClass: getMarkerColor(r.range)
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.top - b.top)
-    .forEach((marker) => {
-      while (positionedMarkers.some((m) => Math.abs(m.top - marker.top) < MIN_DISTANCE)) {
-        marker.top += MIN_DISTANCE;
-        if (marker.top > 95) break;
-      }
-      positionedMarkers.push(marker);
-    });
+    const topPercent = Math.max(5, Math.min(95, 50 - (relativeAngle / (fieldOfView / 2)) * 50));
+
+    return {
+      ...r,
+      top: topPercent,
+      isTargeted: Math.abs(relativeAngle) < 1.5, // 👈 индивидуально
+      colorClass: getMarkerColor(r.range),
+    };
+  })
+  .filter(Boolean)
+  .sort((a, b) => a.top - b.top);
 
   return (
     <div className="camera-overlay">
