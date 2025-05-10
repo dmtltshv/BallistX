@@ -14,6 +14,8 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const MIN_DISTANCE = 6;
   const smoothFactor = 0.1;
 
+  const [showMarkers, setShowMarkers] = useState(true);
+
   useEffect(() => {
     const handleOrientation = (event) => {
       if (event.beta != null) {
@@ -119,7 +121,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
         ...r,
         top: topPercent,
         relativeAngle,
-        isTargeted: Math.abs(relativeAngle) < 1.5,
+        isTargeted: Math.abs(relativeAngle) < 0.5, 
         colorClass: getMarkerColor(r.range)
       };
     })
@@ -160,19 +162,27 @@ export default function CameraOverlay({ onClose, results = [] }) {
             Угол: {(tiltAngle - calibrationOffset).toFixed(1)}°
           </div>
 
-          <div className="marker-filter-panel">
-            <strong>Метки:</strong><br />
-            {results.map((r, i) => (
-              <div key={i}>
-                <input
-                  type="checkbox"
-                  checked={!hiddenMarkers.includes(r.range)}
-                  onChange={() => toggleMarker(r.range)}
-                />
-                <label style={{ marginLeft: '0.5rem' }}>{r.range} м</label>
-              </div>
-            ))}
+          <div style={{ position: 'absolute', top: '3.5rem', right: '1rem', zIndex: 10 }}>
+            <button className="toggle-marker-list" onClick={() => setShowMarkers(prev => !prev)}>
+              {showMarkers ? '▼ Метки' : '► Метки'}
+            </button>
           </div>
+
+          {showMarkers && (
+            <div className="marker-filter-panel">
+              <strong>Метки:</strong><br />
+              {results.map((r, i) => (
+                <div key={i}>
+                  <input
+                    type="checkbox"
+                    checked={!hiddenMarkers.includes(r.range)}
+                    onChange={() => toggleMarker(r.range)}
+                  />
+                  <label style={{ marginLeft: '0.5rem' }}>{r.range} м</label>
+                </div>
+              ))}
+            </div>
+          )}
 
           {showWarning && (
             <div className="warning-overlay">

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import { FiBarChart2 } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const TrajectoryChart = ({ results }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const [chartReady, setChartReady] = useState(false);
+  const navigate = useNavigate();
 
   // Проверка ширины экрана
   useEffect(() => {
@@ -115,9 +117,7 @@ const TrajectoryChart = ({ results }) => {
       </h3>
 
       {isMobile && (
-        <button className="btn-glow action-btn" onClick={openGraphInNewTab} style={{margin:"auto"}}>
-          Открыть график
-        </button>
+        <button onClick={() => navigate('/chart', { state: { results } })}>Открыть график</button>
       )}
 
       <div className={`chart-scroll-wrapper ${isMobile ? 'visually-hidden' : ''}`}>

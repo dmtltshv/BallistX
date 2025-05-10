@@ -14,6 +14,7 @@ import { calculateTrajectory } from '../services/ballisticCalculations';
 import ballisticData from '../data/ballisticData';
 import OfflineManager from '../services/OfflineManager';
 import { ReactComponent as BallistXLogo } from '../assets/logo.svg';
+import { useResults } from '../context/ResultsContext';
 
 
 <a href="/" className="logo-link">
@@ -236,7 +237,6 @@ useEffect(() => {
   setTheme(initialTheme);
   document.documentElement.setAttribute('data-theme', initialTheme);
 }, []);
-
   return (
     <div className={`calculator-container ${isFieldMode ? 'field-mode' : ''} main-layout ${results?.length > 0 ? 'has-results' : 'no-results'}`}>
      <>
