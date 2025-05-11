@@ -96,8 +96,10 @@ export default function CameraOverlay({ onClose, results = [] }) {
 
   const calculateMarkerAngle = (drop, range) => {
     if (!range) return 0;
-    return Math.atan2(drop / 100, range) * (180 / Math.PI);
+    const radians = Math.atan2(drop / 100, range);
+    return radians * (180 / Math.PI);
   };
+  
 
   const getMarkerColor = (range) => {
     if (range <= 300) return 'green-marker';

@@ -802,11 +802,10 @@ label {
 
 .tilt-indicator {
   position: absolute;
-  top: 1rem;
-  right: 160px;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
   background: rgba(0, 0, 0, 0.5);
   color: white;
-  padding: 0.5rem 0.8rem;
   font-size: 1rem;
   border-radius: 8px;
   font-weight: bold;
@@ -1157,9 +1156,9 @@ button.btn-glow.add-btn {
 
 .marker-filter-panel {
   position: absolute;
-  top: 60px;
-  right: 10px;
-  width: 140px;
+  top: 3rem;
+  padding: 0.5rem 1rem;
+  width: 100px;
   background: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 10px;
@@ -1228,4 +1227,8 @@ button.btn-glow.add-btn {
   margin: 1rem 0;
   padding: 0.5rem 1rem;
   font-size: 0.95rem;
-}
+}const calculateMarkerAngle = (drop, range) => {
+  if (!range) return 0;
+  const radians = Math.atan2(drop / 100, range);
+  return radians * (180 / Math.PI);
+};
