@@ -113,7 +113,7 @@ const TrajectoryChart = ({ results }) => {
       </h3>
 
       {isMobile && (
-        <button className="btn-glow action-btn" onClick={openChartPage}>
+        <button className="btn-glow action-btn" onClick={openGraphImage}>
           Открыть график
         </button>
       )}
