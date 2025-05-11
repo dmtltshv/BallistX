@@ -99,15 +99,11 @@ const TrajectoryChart = ({ results }) => {
     };
   }, [results]);
 
-  const openGraphInNewTab = () => {
-    if (!chartReady || !chartRef.current) {
-      alert('График ещё загружается...');
-      return;
-    }
+  const openGraphImage = () => {
+    if (!chartRef.current) return;
+  
     const dataUrl = chartRef.current.toDataURL();
-    const newTab = window.open();
-    newTab.document.write(`<img src="${dataUrl}" alt="Trajectory Chart" style="max-width: 100%;" />`);
-    newTab.document.title = "График траектории";
+    navigate('/chart-image', { state: { imageDataUrl: dataUrl } });
   };
 
   return (
@@ -117,12 +113,9 @@ const TrajectoryChart = ({ results }) => {
       </h3>
 
       {isMobile && (
-      <button
-        onClick={() => navigate('/chart-image', { state: { results } })}
-        className="btn-glow action-btn"
-      >
-        Открыть график
-      </button>
+        <button onClick={openGraphImage} className="btn-glow action-btn">
+          Открыть график
+        </button>
       )}
 
       <div className={`chart-scroll-wrapper ${isMobile ? 'visually-hidden' : ''}`}>
