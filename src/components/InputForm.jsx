@@ -13,7 +13,9 @@ const InputForm = ({
   setConditions,
   isFieldMode,
   onCalculate,
-  windData,
+  results,
+  setResults,
+  setOriginalResults,
   customBullets = []
 }) => {
   const [calibers, setCalibers] = useState([]);
@@ -201,9 +203,23 @@ const InputForm = ({
       </div>
   
       <div className="action-buttons">
+      {results.length == 0 && (
         <button className="btn-glow action-btn" onClick={onCalculate}>
            Рассчитать траекторию
         </button>
+        )}
+        {results.length > 0 && (
+          <button
+            className="btn-glow delete-btn"
+            onClick={() => {
+              setResults([]);
+              setOriginalResults([]);
+              localStorage.removeItem('ballistic-results'); // если ты сохраняешь результаты туда
+            }}
+          >
+            Очистить результаты
+          </button>
+        )}
         
         {!isFieldMode && (
         <>

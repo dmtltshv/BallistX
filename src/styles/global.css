@@ -1093,6 +1093,7 @@ button.btn-glow.add-btn {
 .action-btn {
   max-width: 100%;
   min-width: 200px;
+  margin: auto;
 }
 
 .empty-state {

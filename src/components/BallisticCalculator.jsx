@@ -311,6 +311,9 @@ useEffect(() => {
             onCalculate={calculate}
             windData={conditions}
             customBullets={customBullets}
+            results={results}                           
+            setResults={setResults}                     
+            setOriginalResults={setOriginalResults}   
           />
           {!isFieldMode && (
             <>
