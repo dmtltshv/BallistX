@@ -38,7 +38,6 @@ const BallisticCalculator = () => {
     windSpeed: 0,
     windAngle: 90,
   });
-  const [results, setResults] = useState([]);
   const [originalResults, setOriginalResults] = useState([]);
   const [showLibrary, setShowLibrary] = useState(false);
   const [showJournal, setShowJournal] = useState(false);
@@ -61,6 +60,9 @@ const BallisticCalculator = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const [closingJournal, setClosingJournal] = useState(false);
+  const { results: globalResults, setResults: setGlobalResults } = useResults();
+  const [results, setResults] = useState(globalResults); // ← начальное значение из глобального хранилища
+
 
 useEffect(() => {
   const handleClickOutside = (event) => {
@@ -124,6 +126,21 @@ useEffect(() => {
       setClosingJournal(false);
     }, 300);
   };
+  useEffect(() => {
+    if (results.length > 0) {
+      localStorage.setItem('ballistic-results', JSON.stringify(results));
+    }
+  }, [results]);
+  useEffect(() => {
+    if (globalResults.length === 0) {
+      const saved = localStorage.getItem('ballistic-results');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setResults(parsed);
+        setGlobalResults(parsed);
+      }
+    }
+  }, []);
   
   useEffect(() => {
     const loadCustomBullets = async () => {
@@ -163,8 +180,9 @@ useEffect(() => {
       maxRange,
       step,
     });
-
+    
     setResults(calculatedResults);
+    setGlobalResults(calculatedResults); // <=== сохраняем в контекст
     setOriginalResults(calculatedResults);
     saveSession(calculatedResults);
   };

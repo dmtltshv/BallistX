@@ -4,8 +4,6 @@ import './App.css';
 import './styles/global.css';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import TrajectoryChartPage from './components/TrajectoryChartPage';
-import TrajectoryChartImage from './components/TrajectoryChartImage';
-import { ResultsProvider } from './context/ResultsContext';
 
 function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -26,7 +24,6 @@ function App() {
       <Routes>
         <Route path="/" element={<BallisticCalculator />} />
         <Route path="/chart" element={<TrajectoryChartPage />} />
-        <Route path="/chart-image" element={<TrajectoryChartImage />} />
       </Routes>
     </BrowserRouter>
   );
