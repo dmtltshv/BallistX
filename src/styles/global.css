@@ -150,6 +150,11 @@
 /* Keep existing styles below */
 
 body {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  
   background-color: var(--bg);
   color: var(--text);
   font-family: 'Segoe UI', sans-serif;
@@ -1227,8 +1232,4 @@ button.btn-glow.add-btn {
   margin: 1rem 0;
   padding: 0.5rem 1rem;
   font-size: 0.95rem;
-}const calculateMarkerAngle = (drop, range) => {
-  if (!range) return 0;
-  const radians = Math.atan2(drop / 100, range);
-  return radians * (180 / Math.PI);
-};
+}
