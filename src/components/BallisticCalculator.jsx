@@ -62,23 +62,7 @@ const BallisticCalculator = () => {
   const [closingJournal, setClosingJournal] = useState(false);
   const { results: globalResults, setResults: setGlobalResults } = useResults();
   const [results, setResults] = useState(globalResults); // ← начальное значение из глобального хранилища
-
-
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setMenuOpen(false);
-    }
-  };
-
-  if (menuOpen) {
-    document.addEventListener('mousedown', handleClickOutside);
-  }
-
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, [menuOpen]);
+  const burgerRef = useRef(null);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -103,20 +87,25 @@ useEffect(() => {
   }, [shouldCalculate]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false);
-      }
-    };
-  
-    if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+  const handleClickOutside = (event) => {
+    if (
+      menuRef.current &&
+      !menuRef.current.contains(event.target) &&
+      burgerRef.current &&
+      !burgerRef.current.contains(event.target) // 👈 добавлено
+    ) {
+      setMenuOpen(false);
     }
-  
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [menuOpen]);
+  };
+
+  if (menuOpen) {
+    document.addEventListener('mousedown', handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, [menuOpen]);
   
   const handleCloseJournal = () => {
     if (closingJournal) return;
@@ -258,33 +247,36 @@ useEffect(() => {
   return (
     <div className={`calculator-container ${isFieldMode ? 'field-mode' : ''} main-layout ${results?.length > 0 ? 'has-results' : 'no-results'}`}>
      <>
-    <button
-      className="floating-burger"
-      onClick={() => {
-        setMenuOpen(prev => !prev);
-        setShowLibrary(false);
-        setShowJournal(false);
-      }}
-    >
-      <FiMenu className="menu-icon" />
-    </button>
+     <button
+        ref={burgerRef}
+        className="floating-burger"
+        onClick={() => {
+          setMenuOpen(prev => !prev); // ← это работает, если нет дублирующего эффекта
+          setShowLibrary(false);
+          setShowJournal(false);
+        }}
+      >
+        <FiMenu className="menu-icon" />
+      </button>
 
-    {menuOpen && (
-      <div className="floating-menu" ref={menuRef}>
-        <button onClick={() => { setShowLibrary(true); setMenuOpen(false); }} className="menu-button">
-          <FiBook className="menu-icon" /> Пули
-        </button>
-        <button onClick={() => { setShowJournal(true); setMenuOpen(false); }} className="menu-button">
-          <FiClock className="menu-icon" /> История
-        </button>
-        <button onClick={() => { setIsFieldMode(!isFieldMode)}} className="menu-button">
-          <FiSettings className="menu-icon" /> Режим
-        </button>
-        <button onClick={() => { toggleTheme()}} className="menu-button">
-          {theme === 'dark' ? <FiSun className="menu-icon" /> : <FiMoon className="menu-icon" />} Тема
-        </button>
-      </div>
-    )}
+    <div
+        className={`floating-menu ${menuOpen ? 'open' : 'closed'}`}
+        ref={menuRef}
+        style={{ display: menuOpen ? 'flex' : 'none' }}
+      >
+              <button onClick={() => { setShowLibrary(true); setMenuOpen(false); }} className="menu-button">
+                <FiBook className="menu-icon" /> Пули
+              </button>
+              <button onClick={() => { setShowJournal(true); setMenuOpen(false); }} className="menu-button">
+                <FiClock className="menu-icon" /> История
+              </button>
+              <button onClick={() => { setIsFieldMode(!isFieldMode)}} className="menu-button">
+                <FiSettings className="menu-icon" /> Режим
+              </button>
+              <button onClick={() => { toggleTheme()}} className="menu-button">
+                {theme === 'dark' ? <FiSun className="menu-icon" /> : <FiMoon className="menu-icon" />} Тема
+              </button>
+    </div>
     </>
     
       <div className="app-header">
