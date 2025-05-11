@@ -118,18 +118,31 @@ const BallisticCalculator = () => {
   useEffect(() => {
     if (results.length > 0) {
       localStorage.setItem('ballistic-results', JSON.stringify(results));
+      localStorage.setItem('ballistic-bullet', JSON.stringify(bullet));
+       localStorage.setItem('ballistic-conditions', JSON.stringify(conditions));
     }
-  }, [results]);
+  }, [results, bullet, conditions]);
+
   useEffect(() => {
-    if (globalResults.length === 0) {
-      const saved = localStorage.getItem('ballistic-results');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setResults(parsed);
-        setGlobalResults(parsed);
-      }
-    }
-  }, []);
+  const savedResults = localStorage.getItem('ballistic-results');
+  const savedBullet = localStorage.getItem('ballistic-bullet');
+  const savedConditions = localStorage.getItem('ballistic-conditions');
+
+  if (savedResults) {
+    const parsed = JSON.parse(savedResults);
+    setResults(parsed);
+    setGlobalResults(parsed);
+  }
+
+  if (savedBullet) {
+    setBullet(JSON.parse(savedBullet));
+  }
+
+  if (savedConditions) {
+    setConditions(JSON.parse(savedConditions));
+  }
+}, []);
+
   
   useEffect(() => {
     const loadCustomBullets = async () => {
@@ -343,12 +356,12 @@ const BallisticCalculator = () => {
                 onClose={() => setShowCamera(false)} // 👈 и это тоже
               />
             )}
-          {!isFieldMode && (
-          <AIAssistant
+          {!isFieldMode && results.length > 0 && bullet && (
+            <AIAssistant
             results={results}
             bullet={bullet}
             conditions={conditions}
-            isFieldMode={false} // можно даже не передавать, но оставим для совместимости
+            isFieldMode={false}
           />
         )}
         </div>
