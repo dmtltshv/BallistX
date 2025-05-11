@@ -99,6 +99,15 @@ const TrajectoryChart = ({ results }) => {
     };
   }, [results]);
 
+  const openGraphInNewTab = () => {
+    if (!chartReady || !chartRef.current) {
+      alert('График ещё загружается...');
+      return;
+    }
+    const dataUrl = chartRef.current.toDataURL('image/png');
+    window.open(`/chart?image=${encodeURIComponent(dataUrl)}`, '_blank');
+  };
+
   const openGraphImage = () => {
     if (!chartRef.current) return;
   

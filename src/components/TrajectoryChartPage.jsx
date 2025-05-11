@@ -6,6 +6,8 @@ const TrajectoryChartPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const chartRef = useRef(null);
+  const query = new URLSearchParams(window.location.search);
+  const imageData = query.get('image');
 
   useEffect(() => {
     if (!state?.results?.length) return;
@@ -75,14 +77,17 @@ const TrajectoryChartPage = () => {
   }, [state]);
 
   return (
-    <div className="chart-page" style={{ padding: '1rem' }}>
-      <button className="btn-glow back-btn" onClick={() => navigate(-1)}>
-        ← Назад
-      </button>
-      <div style={{ width: '100%', maxWidth: '700px', margin: '2rem auto' }}>
-        <canvas ref={chartRef} width={700} height={300} />
-      </div>
-    </div>
+    <div className="chart-page" style={{ padding: '1rem', textAlign: 'center' }}>
+    <button className="btn-glow back-btn" onClick={() => navigate(-1)}>
+      ← Назад
+    </button>
+
+    {imageData ? (
+      <img src={imageData} alt="Trajectory Chart" style={{ maxWidth: '100%', marginTop: '1rem' }} />
+    ) : (
+      <p>Ошибка: изображение не найдено.</p>
+    )}
+  </div>
   );
 };
 
