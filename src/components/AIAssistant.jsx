@@ -17,7 +17,6 @@ const AIAssistant = ({ results, bullet, conditions }) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${process.env.REACT_APP_OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'http://localhost:3000',
           'X-Title': 'BallistX AI Assistant'
         },
         body: JSON.stringify({
