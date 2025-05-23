@@ -129,7 +129,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
     return {
       ...r,
       top,
-      isTargeted: Math.abs(r.top - 50) < 1,
+      isTargeted: Math.abs(r.top - 50) < 2,
       colorClass: getMarkerColor(r.range),
     };
   });
