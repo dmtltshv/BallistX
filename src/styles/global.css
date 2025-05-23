@@ -780,7 +780,7 @@ label {
 .marker {
   position: absolute;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.6);
   padding: 6px 12px;
   border-radius: 10px;
@@ -1162,6 +1162,9 @@ button.btn-glow.add-btn {
 .marker-filter-panel {
   position: absolute;
   top: 3rem;
+  right: 1rem;
+  max-height: 60vh; 
+  overflow-y: auto; 
   padding: 0.5rem 1rem;
   width: 100px;
   background: rgba(0, 0, 0, 0.7);
