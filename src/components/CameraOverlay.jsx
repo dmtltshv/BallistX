@@ -13,6 +13,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const fieldOfView = 60;
   const MIN_DISTANCE = 6;
   const smoothFactor = 0.1;
+  const angleAmplify = 1.5;
 
   const [showMarkers, setShowMarkers] = useState(true);
 
@@ -113,20 +114,25 @@ export default function CameraOverlay({ onClose, results = [] }) {
   .map((r) => {
     const markerAngle = calculateMarkerAngle(r.drop, r.range);
     const relativeAngle = markerAngle - (tiltAngle - calibrationOffset);
-
     if (Math.abs(relativeAngle) > fieldOfView / 2) return null;
-
-    const topPercent = Math.max(5, Math.min(95, 50 - (relativeAngle / (fieldOfView / 2)) * 50));
 
     return {
       ...r,
-      top: topPercent,
-      isTargeted: Math.abs(relativeAngle) < 1.5, // 👈 индивидуально
-      colorClass: getMarkerColor(r.range),
+      angle: markerAngle,
+      relativeAngle,
     };
   })
   .filter(Boolean)
-  .sort((a, b) => a.top - b.top);
+  .sort((a, b) => a.relativeAngle - b.relativeAngle)
+  .map((r, i, arr) => {
+    const top = Math.max(5, Math.min(95, 50 - (r.relativeAngle * angleAmplify / (fieldOfView / 2)) * 50));
+    return {
+      ...r,
+      top,
+      isTargeted: Math.abs(r.relativeAngle) < 1.5,
+      colorClass: getMarkerColor(r.range),
+    };
+  });
 
   return (
     <div className="camera-overlay">

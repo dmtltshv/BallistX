@@ -1149,14 +1149,15 @@ button.btn-glow.add-btn {
   transform: translateY(-50%);
 }
 
+
 .marker.pulse {
-  animation: pulse 1s infinite;
+  animation: pulse 1.2s infinite;
 }
 
 @keyframes pulse {
-  0%   { transform: scale(1); opacity: 1; }
-  50%  { transform: scale(1); opacity: 0.6; }
-  100% { transform: scale(1); opacity: 1; }
+  0%   { transform: translateX(-50%) scale(1); opacity: 1; }
+  50%  { transform: translateX(-50%) scale(1.1); opacity: 0.7; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
 .marker-filter-panel {
@@ -1217,8 +1218,8 @@ button.btn-glow.add-btn {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  from { opacity: 0; transform: translateX(-50%) scale(0.95); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 
 .toggle-marker-list {
