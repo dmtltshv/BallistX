@@ -1161,7 +1161,7 @@ button.btn-glow.add-btn {
 
 .marker-filter-panel {
   position: absolute;
-  top: 3rem;
+  top: 5rem;
   right: 1rem;
   max-height: 60vh; 
   overflow-y: auto; 
