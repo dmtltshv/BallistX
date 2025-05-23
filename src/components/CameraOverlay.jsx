@@ -125,11 +125,11 @@ export default function CameraOverlay({ onClose, results = [] }) {
   .filter(Boolean)
   .sort((a, b) => a.relativeAngle - b.relativeAngle)
   .map((r) => {
-    const top = Math.max(5, Math.min(95, 50 - (r.relativeAngle * 2))); // 1° = 2% смещение
+    const top = Math.max(5, Math.min(95, 50 - (r.relativeAngle * 2)));
     return {
       ...r,
       top,
-      isTargeted: Math.abs(r.top - 50) < 2,
+      isTargeted: Math.abs(top - 50) < 0.8,
       colorClass: getMarkerColor(r.range),
     };
   });
