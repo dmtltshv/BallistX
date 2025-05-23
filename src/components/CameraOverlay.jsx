@@ -13,7 +13,7 @@ export default function CameraOverlay({ onClose, results = [] }) {
   const fieldOfView = 60;
   const MIN_DISTANCE = 6;
   const smoothFactor = 0.1;
-  const angleAmplify = 1.5;
+  const angleAmplify = 5;
 
   const [showMarkers, setShowMarkers] = useState(true);
 
